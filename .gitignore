@@ -1,0 +1,33 @@
+# API Keys and secrets
+.env
+
+# Data files
+data/
+*.pdf
+*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ChromaDB
+chroma_db/
+*.db
+
+# OS
+.DS_Store

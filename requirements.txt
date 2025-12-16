@@ -1,0 +1,14 @@
+# Core dependencies
+langchain==0.3.15
+langchain-community==0.3.15
+langchain-chroma==0.1.4
+chromadb==0.5.23
+pypdf==5.1.0
+cryptography>=3.1  # Required for encrypted PDFs
+sentence-transformers>=5.2.0  # Local embeddings
+requests>=2.31.0  # For Ollama API calls
+pandas>=2.1.4  # CSV data processing
+
+# Future dependencies (uncomment when needed)
+# streamlit==1.29.0
+# pytest==7.4.3
