@@ -1,6 +1,7 @@
 import requests
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from src.vector_store import query_similar_chunks
+from src.hybrid_search import HybridSearchEngine
 
 
 def generate_answer_ollama(question: str, context_chunks: List[str], model: str = "llama3.2:3b") -> str:
@@ -49,7 +50,13 @@ Answer:"""
         return f"Error: {response.status_code} - {response.text}"
 
 
-def ask_question(collection, question: str, n_results: int = 3, filter_metadata: Dict[str, Any] = None) -> Dict[str, Any]:
+def ask_question(
+    collection,
+    question: str,
+    n_results: int = 3,
+    filter_metadata: Dict[str, Any] = None,
+    search_method: str = "hybrid"
+) -> Dict[str, Any]:
     """
     Complete RAG pipeline: retrieve relevant chunks and generate answer.
 
@@ -58,6 +65,7 @@ def ask_question(collection, question: str, n_results: int = 3, filter_metadata:
         question: User's question
         n_results: Number of chunks to retrieve
         filter_metadata: Optional metadata filter (e.g., {"domain": "automotive"})
+        search_method: Search method - "semantic", "bm25", or "hybrid" (default)
 
     Returns:
         Dictionary with answer, sources, and retrieved chunks
@@ -66,11 +74,29 @@ def ask_question(collection, question: str, n_results: int = 3, filter_metadata:
     print("="*60)
 
     # Step 1: Retrieve relevant chunks
-    print("Step 1: Retrieving relevant chunks...")
-    results = query_similar_chunks(collection, question, n_results=n_results, filter_metadata=filter_metadata)
+    print(f"Step 1: Retrieving relevant chunks ({search_method} search)...")
 
-    chunks = results['documents'][0]
-    metadatas = results['metadatas'][0]
+    if search_method in ["hybrid", "bm25"]:
+        # Use hybrid search engine
+        if not hasattr(ask_question, '_hybrid_engine'):
+            ask_question._hybrid_engine = HybridSearchEngine(collection)
+
+        domain = filter_metadata.get("domain") if filter_metadata else None
+        results = ask_question._hybrid_engine.search(
+            query=question,
+            n_results=n_results,
+            domain=domain,
+            method=search_method
+        )
+
+        chunks = [r['document'] for r in results]
+        metadatas = [r['metadata'] for r in results]
+
+    else:
+        # Use semantic search only (original method)
+        results = query_similar_chunks(collection, question, n_results=n_results, filter_metadata=filter_metadata)
+        chunks = results['documents'][0]
+        metadatas = results['metadatas'][0]
 
     print(f"✅ Retrieved {len(chunks)} chunks\n")
 

@@ -29,5 +29,8 @@ ENV/
 chroma_db/
 *.db
 
+# BM25 Index (generated)
+*.pkl
+
 # OS
 .DS_Store
