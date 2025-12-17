@@ -2,6 +2,7 @@ import requests
 from typing import List, Dict, Any, Optional
 from src.vector_store import query_similar_chunks
 from src.hybrid_search import HybridSearchEngine
+from src.reranker import rerank_chunks
 
 
 def generate_answer_ollama(question: str, context_chunks: List[str], model: str = "llama3.2:3b") -> str:
@@ -55,7 +56,8 @@ def ask_question(
     question: str,
     n_results: int = 3,
     filter_metadata: Dict[str, Any] = None,
-    search_method: str = "hybrid"
+    search_method: str = "hybrid",
+    use_reranking: bool = True
 ) -> Dict[str, Any]:
     """
     Complete RAG pipeline: retrieve relevant chunks and generate answer.
@@ -63,9 +65,10 @@ def ask_question(
     Args:
         collection: ChromaDB collection
         question: User's question
-        n_results: Number of chunks to retrieve
+        n_results: Number of chunks to retrieve (final count after reranking)
         filter_metadata: Optional metadata filter (e.g., {"domain": "automotive"})
         search_method: Search method - "semantic", "bm25", or "hybrid" (default)
+        use_reranking: Whether to use LLM reranking (default: True)
 
     Returns:
         Dictionary with answer, sources, and retrieved chunks
@@ -74,7 +77,14 @@ def ask_question(
     print("="*60)
 
     # Step 1: Retrieve relevant chunks
-    print(f"Step 1: Retrieving relevant chunks ({search_method} search)...")
+    # If using reranking, retrieve more chunks initially (3x the final count)
+    initial_n_results = n_results * 3 if use_reranking else n_results
+
+    search_desc = f"{search_method} search"
+    if use_reranking:
+        search_desc += f" + reranking"
+
+    print(f"Step 1: Retrieving relevant chunks ({search_desc})...")
 
     if search_method in ["hybrid", "bm25"]:
         # Use hybrid search engine
@@ -84,7 +94,7 @@ def ask_question(
         domain = filter_metadata.get("domain") if filter_metadata else None
         results = ask_question._hybrid_engine.search(
             query=question,
-            n_results=n_results,
+            n_results=initial_n_results,
             domain=domain,
             method=search_method
         )
@@ -94,11 +104,25 @@ def ask_question(
 
     else:
         # Use semantic search only (original method)
-        results = query_similar_chunks(collection, question, n_results=n_results, filter_metadata=filter_metadata)
+        results = query_similar_chunks(collection, question, n_results=initial_n_results, filter_metadata=filter_metadata)
         chunks = results['documents'][0]
         metadatas = results['metadatas'][0]
 
-    print(f"✅ Retrieved {len(chunks)} chunks\n")
+    print(f"✅ Retrieved {len(chunks)} chunks")
+
+    # Step 1.5: Rerank if enabled
+    if use_reranking and len(chunks) > n_results:
+        print(f"   🔄 Reranking to top {n_results}...")
+        chunks, metadatas = rerank_chunks(
+            query=question,
+            chunks=chunks,
+            metadatas=metadatas,
+            top_k=n_results,
+            method="ollama"
+        )
+        print(f"   ✅ Reranking complete")
+
+    print()
 
     # Step 2: Generate answer
     print("Step 2: Generating answer with LLM...")
