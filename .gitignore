@@ -34,3 +34,6 @@ chroma_db/
 
 # OS
 .DS_Store
+
+# Prevent nested repository
+FlexiRAG/
