@@ -11,7 +11,7 @@ A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that
 - 🚀 **Production-ready** with smart indexing and domain filtering
 - 💰 **100% free and local** - no API costs
 
-**Current Status:** ✅ Week 2 Complete - Dynamic multi-domain framework ready
+**Current Status:** ✅ Week 2 Complete - Dynamic multi-domain framework with evaluation (75-85% accuracy)
 
 ## Project Overview
 
@@ -26,6 +26,7 @@ Portfolio project demonstrating advanced ML/RAG engineering for ML Engineer role
 - ✅ Smart indexing with change detection
 - ✅ Domain filtering for precise queries
 - ✅ Interactive CLI with commands (/switch, /stats, /help)
+- ✅ Custom evaluation framework (keyword coverage + success rate)
 
 **🤖 ML/AI Stack:**
 - ✅ Local embeddings (sentence-transformers: all-MiniLM-L6-v2)
