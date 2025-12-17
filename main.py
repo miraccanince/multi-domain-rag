@@ -222,6 +222,7 @@ def main():
     print("\n" + "="*60)
     print("💬 Ask your questions!")
     print("="*60)
+    print("\n🔍 Using: Hybrid Search (Semantic + BM25)")
     print("\nCommands:")
     print("  /switch  - Change domain")
     print("  /stats   - Show statistics")
@@ -251,6 +252,7 @@ def main():
             for domain_name, count in domains.items():
                 print(f"  - {domain_name}: {count:,}")
             print(f"\nCurrent domain: {selected_domain}")
+            print(f"Search method: Hybrid (Semantic + BM25)")
             continue
 
         elif question.lower() == '/help':
@@ -265,6 +267,9 @@ def main():
             print("  - Ask specific questions for better results")
             print("  - Use domain filtering to avoid irrelevant results")
             print("  - Check sources to verify answer accuracy")
+            print("\nSearch:")
+            print("  - Using Hybrid search (Semantic + BM25 keyword)")
+            print("  - Best for technical terms and conceptual queries")
             continue
 
         # Skip empty questions
