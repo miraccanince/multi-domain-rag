@@ -32,27 +32,34 @@ class HybridSearchEngine:
         all_ids: List of all document IDs
     """
 
-    def __init__(self, collection, bm25_index_path: Optional[str] = None):
+    def __init__(self, collection, bm25_index_path: Optional[str] = None, auto_save: bool = True):
         """
         Initialize hybrid search engine.
 
         Args:
             collection: ChromaDB collection
             bm25_index_path: Path to saved BM25 index (optional)
+            auto_save: Automatically save BM25 index if built (default: True)
         """
         self.collection = collection
         self.bm25 = None
         self.all_documents = None
         self.all_metadatas = None
         self.all_ids = None
+        self.bm25_index_path = bm25_index_path or "bm25_index.pkl"
+        self.auto_save = auto_save
 
         # Load or build BM25 index
-        if bm25_index_path and Path(bm25_index_path).exists():
-            print(f"Loading BM25 index from: {bm25_index_path}")
-            self._load_bm25_index(bm25_index_path)
+        if Path(self.bm25_index_path).exists():
+            print(f"⚡ Loading BM25 index from: {self.bm25_index_path}")
+            self._load_bm25_index(self.bm25_index_path)
         else:
-            print("Building BM25 index from ChromaDB...")
+            print("🔨 Building BM25 index from ChromaDB...")
             self._build_bm25_index()
+
+            # Auto-save if enabled
+            if self.auto_save:
+                self.save_bm25_index(self.bm25_index_path)
 
     def _tokenize(self, text: str) -> List[str]:
         """

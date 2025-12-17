@@ -1,8 +1,10 @@
 import requests
+import time
 from typing import List, Dict, Any, Optional
 from src.vector_store import query_similar_chunks
 from src.hybrid_search import HybridSearchEngine
 from src.reranker import rerank_chunks
+from src.cache_manager import get_query_cache, get_performance_monitor
 
 
 def generate_answer_ollama(question: str, context_chunks: List[str], model: str = "llama3.2:3b") -> str:
@@ -57,7 +59,8 @@ def ask_question(
     n_results: int = 3,
     filter_metadata: Dict[str, Any] = None,
     search_method: str = "hybrid",
-    use_reranking: bool = True
+    use_reranking: bool = True,
+    use_cache: bool = True
 ) -> Dict[str, Any]:
     """
     Complete RAG pipeline: retrieve relevant chunks and generate answer.
@@ -69,14 +72,35 @@ def ask_question(
         filter_metadata: Optional metadata filter (e.g., {"domain": "automotive"})
         search_method: Search method - "semantic", "bm25", or "hybrid" (default)
         use_reranking: Whether to use LLM reranking (default: True)
+        use_cache: Whether to use query result caching (default: True)
 
     Returns:
         Dictionary with answer, sources, and retrieved chunks
     """
+    start_time = time.time()
+
     print(f"\nQuestion: {question}")
     print("="*60)
 
+    # Get cache and monitor
+    cache = get_query_cache()
+    monitor = get_performance_monitor()
+
+    # Try cache first
+    domain = filter_metadata.get("domain") if filter_metadata else None
+    cached_result = None
+    if use_cache:
+        cached_result = cache.get(question, domain=domain, method=search_method, n_results=n_results)
+        if cached_result is not None:
+            print("⚡ Cache hit! Returning cached result...")
+            elapsed_time = time.time() - start_time
+            monitor.record_query(total_time=elapsed_time)
+            print(f"⏱️  Total time: {elapsed_time:.3f}s\n")
+            return cached_result
+
     # Step 1: Retrieve relevant chunks
+    search_start = time.time()
+
     # If using reranking, retrieve more chunks initially (3x the final count)
     initial_n_results = n_results * 3 if use_reranking else n_results
 
@@ -87,11 +111,10 @@ def ask_question(
     print(f"Step 1: Retrieving relevant chunks ({search_desc})...")
 
     if search_method in ["hybrid", "bm25"]:
-        # Use hybrid search engine
+        # Use hybrid search engine (singleton)
         if not hasattr(ask_question, '_hybrid_engine'):
             ask_question._hybrid_engine = HybridSearchEngine(collection)
 
-        domain = filter_metadata.get("domain") if filter_metadata else None
         results = ask_question._hybrid_engine.search(
             query=question,
             n_results=initial_n_results,
@@ -108,10 +131,13 @@ def ask_question(
         chunks = results['documents'][0]
         metadatas = results['metadatas'][0]
 
-    print(f"✅ Retrieved {len(chunks)} chunks")
+    search_time = time.time() - search_start
+    print(f"✅ Retrieved {len(chunks)} chunks ({search_time:.3f}s)")
 
     # Step 1.5: Rerank if enabled
+    rerank_time = 0.0
     if use_reranking and len(chunks) > n_results:
+        rerank_start = time.time()
         print(f"   🔄 Reranking to top {n_results}...")
         chunks, metadatas = rerank_chunks(
             query=question,
@@ -120,14 +146,17 @@ def ask_question(
             top_k=n_results,
             method="ollama"
         )
-        print(f"   ✅ Reranking complete")
+        rerank_time = time.time() - rerank_start
+        print(f"   ✅ Reranking complete ({rerank_time:.3f}s)")
 
     print()
 
     # Step 2: Generate answer
+    gen_start = time.time()
     print("Step 2: Generating answer with LLM...")
     answer = generate_answer_ollama(question, chunks)
-    print("✅ Answer generated\n")
+    gen_time = time.time() - gen_start
+    print(f"✅ Answer generated ({gen_time:.3f}s)\n")
 
     # Step 3: Format response
     sources = []
@@ -149,9 +178,26 @@ def ask_question(
 
         sources.append(source_info)
 
-    return {
+    result = {
         "question": question,
         "answer": answer,
         "sources": sources,
         "retrieved_chunks": chunks
     }
+
+    # Cache result
+    if use_cache:
+        cache.set(question, result, domain=domain, method=search_method, n_results=n_results)
+
+    # Record performance
+    total_time = time.time() - start_time
+    monitor.record_query(
+        total_time=total_time,
+        search_time=search_time,
+        rerank_time=rerank_time,
+        generation_time=gen_time
+    )
+
+    print(f"⏱️  Total time: {total_time:.3f}s")
+
+    return result

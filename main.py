@@ -14,6 +14,7 @@ import subprocess
 from pathlib import Path
 from src.vector_store import initialize_chroma_db, get_available_domains
 from src.qa_chain import ask_question
+from src.cache_manager import get_query_cache, get_performance_monitor
 
 
 def count_data_files() -> dict:
@@ -222,10 +223,12 @@ def main():
     print("\n" + "="*60)
     print("💬 Ask your questions!")
     print("="*60)
-    print("\n🔍 Using: Hybrid Search (Semantic + BM25)")
+    print("\n🔍 Using: Hybrid Search (Semantic + BM25) + Caching")
     print("\nCommands:")
     print("  /switch  - Change domain")
     print("  /stats   - Show statistics")
+    print("  /cache   - Show cache statistics")
+    print("  /perf    - Show performance metrics")
     print("  /help    - Show this help")
     print("  /quit    - Exit\n")
 
@@ -252,7 +255,37 @@ def main():
             for domain_name, count in domains.items():
                 print(f"  - {domain_name}: {count:,}")
             print(f"\nCurrent domain: {selected_domain}")
-            print(f"Search method: Hybrid (Semantic + BM25)")
+            print(f"Search method: Hybrid (Semantic + BM25) + Caching")
+            continue
+
+        elif question.lower() == '/cache':
+            cache = get_query_cache()
+            stats = cache.get_stats()
+            print("\n⚡ Cache Statistics:")
+            print("="*60)
+            print(f"Cache size: {stats['size']}/{stats['max_size']} items")
+            print(f"Cache hits: {stats['hits']}")
+            print(f"Cache misses: {stats['misses']}")
+            print(f"Hit rate: {stats['hit_rate_percent']}%")
+            print(f"Evictions: {stats['evictions']}")
+            print(f"TTL: {stats['ttl_seconds']}s ({stats['ttl_seconds']//60} minutes)")
+            print(f"Total requests: {stats['total_requests']}")
+            continue
+
+        elif question.lower() == '/perf':
+            monitor = get_performance_monitor()
+            stats = monitor.get_stats()
+            print("\n⏱️  Performance Metrics:")
+            print("="*60)
+            print(f"Queries processed: {stats['queries_count']}")
+            if stats['queries_count'] > 0:
+                print(f"\nAverage times:")
+                print(f"  Total: {stats['avg_total_time']:.3f}s")
+                print(f"  Search: {stats['avg_search_time']:.3f}s")
+                print(f"  Reranking: {stats['avg_rerank_time']:.3f}s")
+                print(f"  Generation: {stats['avg_generation_time']:.3f}s")
+            else:
+                print("\nNo queries processed yet.")
             continue
 
         elif question.lower() == '/help':
@@ -261,14 +294,18 @@ def main():
             print("Commands:")
             print("  /switch  - Change domain")
             print("  /stats   - Show statistics")
+            print("  /cache   - Show cache statistics")
+            print("  /perf    - Show performance metrics")
             print("  /help    - Show this help")
             print("  /quit    - Exit")
             print("\nTips:")
             print("  - Ask specific questions for better results")
             print("  - Use domain filtering to avoid irrelevant results")
             print("  - Check sources to verify answer accuracy")
+            print("  - Repeated queries are cached for faster responses")
             print("\nSearch:")
             print("  - Using Hybrid search (Semantic + BM25 keyword)")
+            print("  - Query result caching with 1-hour TTL")
             print("  - Best for technical terms and conceptual queries")
             continue
 
