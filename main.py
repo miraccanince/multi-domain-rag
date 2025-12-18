@@ -11,10 +11,94 @@ FRAMEWORK DESIGN:
 """
 
 import subprocess
+import requests
 from pathlib import Path
 from src.vector_store import initialize_chroma_db, get_available_domains
-from src.qa_chain import ask_question
+from src.qa_chain import ask_question, warm_up_model
 from src.cache_manager import get_query_cache, get_performance_monitor
+
+
+def check_ollama_running() -> bool:
+    """
+    Check if Ollama is running and accessible.
+
+    Returns:
+        True if Ollama is running, False otherwise
+    """
+    try:
+        response = requests.get("http://localhost:11434/api/tags", timeout=3)
+        return response.status_code == 200
+    except:
+        return False
+
+
+def check_and_clean_hanging_processes() -> bool:
+    """
+    Check for hanging Python processes connected to Ollama and clean them.
+
+    Returns:
+        True if cleanup was performed, False otherwise
+    """
+    try:
+        # Check for hanging Python processes on Ollama port
+        result = subprocess.run(
+            ["lsof", "-i", ":11434"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+
+        if result.returncode != 0:
+            return False
+
+        # Parse output for Python processes
+        lines = result.stdout.strip().split('\n')
+        python_pids = []
+
+        for line in lines[1:]:  # Skip header
+            if 'Python' in line or 'python' in line:
+                parts = line.split()
+                if len(parts) > 1:
+                    pid = parts[1]
+                    # Don't kill current process
+                    if pid != str(subprocess.os.getpid()):
+                        python_pids.append(pid)
+
+        if not python_pids:
+            return False
+
+        # Found hanging processes
+        print(f"\n⚠️  Found {len(python_pids)} hanging Python process(es) connected to Ollama")
+        print("   These may be causing slowdowns or timeouts.")
+
+        try:
+            response = input("\n🧹 Clean them up? (yes/no): ").strip().lower()
+            if response in ['yes', 'y', 'evet']:
+                for pid in python_pids:
+                    try:
+                        subprocess.run(["kill", "-9", pid], check=False)
+                    except:
+                        pass
+                print(f"✅ Cleaned up {len(python_pids)} hanging process(es)")
+
+                # Restart Ollama for clean state
+                print("\n🔄 Restarting Ollama for clean state...")
+                subprocess.run(["pkill", "-9", "ollama"], check=False)
+                subprocess.run(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+                import time
+                time.sleep(2)  # Wait for Ollama to start
+                print("✅ Ollama restarted")
+                return True
+            else:
+                print("⚠️  Skipped cleanup. System may be slow.")
+                return False
+        except (EOFError, KeyboardInterrupt):
+            print("\n⚠️  Skipped cleanup.")
+            return False
+
+    except Exception:
+        # Silently fail - this is just a diagnostic feature
+        return False
 
 
 def count_data_files() -> dict:
@@ -161,6 +245,30 @@ def main():
     print("="*60)
     print("\nInitializing system...")
 
+    # Check if Ollama is running
+    print("🔍 Checking Ollama service...")
+    if not check_ollama_running():
+        print("⚠️  WARNING: Ollama is not running or not accessible!")
+        print("   The system will work but LLM features (reranking and answer generation) will fail.")
+        print("   To start Ollama: 'ollama serve' in another terminal")
+        print("   To check if Ollama is running: 'ollama list'\n")
+        try:
+            response = input("Continue anyway? (yes/no): ").strip().lower()
+            if response not in ['yes', 'y', 'evet']:
+                print("\n👋 Please start Ollama and try again.")
+                return
+        except (EOFError, KeyboardInterrupt):
+            print("\n\n👋 Exiting...")
+            return
+    else:
+        print("✅ Ollama is running")
+
+        # Check for and clean hanging processes
+        check_and_clean_hanging_processes()
+
+        # Warm up the model to avoid timeout on first query
+        warm_up_model(model="llama3.2:3b", timeout=60)
+
     # Load existing ChromaDB collection
     try:
         client, collection = initialize_chroma_db(
@@ -220,17 +328,28 @@ def main():
         return
 
     # Interactive question loop
+    use_reranking = False  # Default: OFF for better performance
+    skip_llm = False  # NOW USING STREAMING - no more timeouts!
+
     print("\n" + "="*60)
     print("💬 Ask your questions!")
     print("="*60)
-    print("\n🔍 Using: Hybrid Search (Semantic + BM25) + Caching")
+    print("\n🔍 Configuration:")
+    print("   Search: Hybrid (Semantic + BM25) + Caching")
+    rerank_status = "ON ✅" if use_reranking else "OFF ⚡"
+    llm_status = "SKIP (sources only)" if skip_llm else "ON ✅ (streaming mode)"
+    print(f"   Reranking: {rerank_status}")
+    print(f"   LLM Generation: {llm_status}")
+    print("\n💡 Tip: Using STREAMING mode - answers appear instantly! Use /llm to toggle.")
     print("\nCommands:")
-    print("  /switch  - Change domain")
-    print("  /stats   - Show statistics")
-    print("  /cache   - Show cache statistics")
-    print("  /perf    - Show performance metrics")
-    print("  /help    - Show this help")
-    print("  /quit    - Exit\n")
+    print("  /switch   - Change domain")
+    print("  /llm      - Toggle LLM answer generation")
+    print("  /rerank   - Toggle reranking")
+    print("  /stats    - Show statistics")
+    print("  /cache    - Show cache statistics")
+    print("  /perf     - Show performance metrics")
+    print("  /help     - Show this help")
+    print("  /quit     - Exit\n")
 
     while True:
         print("-"*60)
@@ -245,6 +364,37 @@ def main():
             selected_domain = select_domain(domains)
             if selected_domain is None:
                 break
+            continue
+
+        elif question.lower() == '/llm':
+            skip_llm = not skip_llm
+            print("\n🔄 LLM answer generation toggled!")
+            if skip_llm:
+                print("   ⚡ LLM: SKIPPED")
+                print("   • Shows retrieved document chunks only")
+                print("   • No AI-generated answer")
+                print("   • Very fast (~1-2s per query)")
+                print("   • Read the sources directly")
+            else:
+                print("   ✅ LLM: ENABLED")
+                print("   • Generates AI answer from sources")
+                print("   • Requires working Ollama")
+                print("   • Slower (~30-120s per query)")
+            continue
+
+        elif question.lower() == '/rerank':
+            use_reranking = not use_reranking
+            print("\n🔄 Reranking toggled!")
+            if use_reranking:
+                print("   ✅ Reranking: ON")
+                print("   • More accurate relevance scoring")
+                print("   • Uses LLM to select best results")
+                print("   • Slower (~20s extra per query)")
+            else:
+                print("   ⚡ Reranking: OFF")
+                print("   • Faster responses (~2-5s per query)")
+                print("   • Uses hybrid search ranking only")
+                print("   • Recommended for quick queries")
             continue
 
         elif question.lower() == '/stats':
@@ -292,21 +442,25 @@ def main():
             print("\n💡 Help:")
             print("="*60)
             print("Commands:")
-            print("  /switch  - Change domain")
-            print("  /stats   - Show statistics")
-            print("  /cache   - Show cache statistics")
-            print("  /perf    - Show performance metrics")
-            print("  /help    - Show this help")
-            print("  /quit    - Exit")
+            print("  /switch   - Change domain")
+            print("  /llm      - Toggle LLM answer generation (default: OFF)")
+            print("  /rerank   - Toggle reranking (default: OFF)")
+            print("  /stats    - Show statistics")
+            print("  /cache    - Show cache statistics")
+            print("  /perf     - Show performance metrics")
+            print("  /help     - Show this help")
+            print("  /quit     - Exit")
             print("\nTips:")
+            print("  - LLM is OFF by default - you'll see source documents directly")
+            print("  - Use /llm to enable AI-generated answers (requires Ollama)")
             print("  - Ask specific questions for better results")
             print("  - Use domain filtering to avoid irrelevant results")
-            print("  - Check sources to verify answer accuracy")
             print("  - Repeated queries are cached for faster responses")
             print("\nSearch:")
             print("  - Using Hybrid search (Semantic + BM25 keyword)")
             print("  - Query result caching with 1-hour TTL")
-            print("  - Best for technical terms and conceptual queries")
+            print("  - Fast mode: Shows source documents (~1-2s)")
+            print("  - LLM mode: Generates AI answers (~30-120s)")
             continue
 
         # Skip empty questions
@@ -317,26 +471,80 @@ def main():
             # Build metadata filter
             filter_metadata = None if selected_domain == 'all' else {"domain": selected_domain}
 
-            # Get answer using RAG pipeline
-            result = ask_question(collection, question, n_results=3, filter_metadata=filter_metadata)
+            if skip_llm:
+                # Fast mode: Just search and show chunks, no LLM generation
+                import time
+                from src.hybrid_search import HybridSearchEngine
 
-            # Display answer
-            print(f"\n🤖 Answer:")
-            print("-"*60)
-            print(result['answer'])
+                print(f"\n⚡ Searching (no LLM generation)...")
+                start = time.time()
 
-            # Display sources
-            print(f"\n📚 Sources:")
-            print("-"*60)
-            for i, source in enumerate(result['sources'], 1):
-                if source.get('source_type') == 'csv':
-                    # CSV product
-                    print(f"{i}. {source['source']} (Row {source['row_id']})")
-                    print(f"   Brand: {source['brand']} | Category: {source['category']} | Price: {source['price']}")
-                else:
-                    # PDF document
-                    print(f"{i}. {source['source']} (Page {source['page']})")
-                print(f"   Preview: {source['chunk_preview'][:150]}...")
+                # Initialize search engine
+                if not hasattr(main, '_search_engine'):
+                    main._search_engine = HybridSearchEngine(collection)
+
+                domain = filter_metadata.get("domain") if filter_metadata else None
+                results = main._search_engine.search(
+                    query=question,
+                    n_results=3,
+                    domain=domain,
+                    method="hybrid"
+                )
+
+                elapsed = time.time() - start
+                print(f"✅ Found {len(results)} relevant documents ({elapsed:.2f}s)\n")
+
+                # Display sources with full content
+                print(f"📚 Retrieved Documents:")
+                print("="*60)
+                for i, result in enumerate(results, 1):
+                    metadata = result['metadata']
+                    doc = result['document']
+
+                    print(f"\n{i}. ", end="")
+                    if metadata.get('source_type') == 'csv':
+                        print(f"{metadata.get('source', 'Unknown')} (Row {metadata.get('row_id', 'N/A')})")
+                        print(f"   Brand: {metadata.get('brand', 'N/A')} | Category: {metadata.get('category', 'N/A')} | Price: {metadata.get('sell_price', 'N/A')}")
+                    else:
+                        print(f"{metadata.get('source', 'Unknown')} (Page {metadata.get('page', 'N/A')})")
+
+                    print(f"\n   Content:")
+                    print(f"   {'-'*56}")
+                    # Show first 500 characters of each chunk
+                    preview = doc[:500] if len(doc) > 500 else doc
+                    for line in preview.split('\n'):
+                        print(f"   {line}")
+                    if len(doc) > 500:
+                        print(f"   ... ({len(doc) - 500} more characters)")
+                    print()
+
+            else:
+                # Full mode: Use RAG pipeline with LLM
+                result = ask_question(
+                    collection,
+                    question,
+                    n_results=3,
+                    filter_metadata=filter_metadata,
+                    use_reranking=use_reranking
+                )
+
+                # Display answer
+                print(f"\n🤖 Answer:")
+                print("-"*60)
+                print(result['answer'])
+
+                # Display sources
+                print(f"\n📚 Sources:")
+                print("-"*60)
+                for i, source in enumerate(result['sources'], 1):
+                    if source.get('source_type') == 'csv':
+                        # CSV product
+                        print(f"{i}. {source['source']} (Row {source['row_id']})")
+                        print(f"   Brand: {source['brand']} | Category: {source['category']} | Price: {source['price']}")
+                    else:
+                        # PDF document
+                        print(f"{i}. {source['source']} (Page {source['page']})")
+                    print(f"   Preview: {source['chunk_preview'][:150]}...")
 
         except KeyboardInterrupt:
             print("\n\n👋 Interrupted. Goodbye!")

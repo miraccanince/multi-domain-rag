@@ -31,7 +31,8 @@ def rerank_with_ollama(
     chunks: List[str],
     metadatas: List[Dict],
     top_k: int = 3,
-    model: str = "llama3.2:3b"
+    model: str = "llama3.2:3b",
+    timeout: int = 20
 ) -> Tuple[List[str], List[Dict]]:
     """
     Rerank chunks using Ollama LLM for relevance scoring.
@@ -42,6 +43,7 @@ def rerank_with_ollama(
         metadatas: List of metadata dicts for each chunk
         top_k: Number of top chunks to return
         model: Ollama model name
+        timeout: Request timeout in seconds (default: 20)
 
     Returns:
         Tuple of (top_chunks, top_metadatas)
@@ -85,7 +87,7 @@ Your ranking:"""
                     "temperature": 0.1,  # Low temperature for consistent ranking
                 }
             },
-            timeout=30
+            timeout=timeout
         )
 
         if response.status_code != 200:
