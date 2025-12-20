@@ -11,7 +11,7 @@ A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that
 - 🚀 **Production-ready** with smart indexing and domain filtering
 - 💰 **100% free and local** - no API costs
 
-**Current Status:** ✅ Week 2 Complete - Dynamic multi-domain framework with evaluation (75-85% accuracy)
+**Current Status:** ✅ Week 4 Complete - Production-ready web application with API, UI & Docker deployment
 
 ## Project Overview
 
@@ -40,22 +40,38 @@ Portfolio project demonstrating advanced ML/RAG engineering for ML Engineer role
 - ✅ Fashion: 30,758 products (E-commerce CSV)
 - ✅ Total: 31,393 indexed documents
 
-**🔜 Planned (Week 3-4):**
-- Evaluation metrics (RAGAS framework)
-- Hybrid search (semantic + keyword)
-- Query reranking
-- PCA visualization
-- Streamlit UI
-- Deployment guide
+**🚀 Advanced Features (Week 3-4):**
+- ✅ Hybrid search (Semantic + BM25)
+- ✅ LLM-based query reranking
+- ✅ Performance optimization & caching (360x speedup)
+- ✅ FastAPI backend with streaming
+- ✅ Modern Streamlit web UI with analytics
+- ✅ **Unit tests (26 tests, 100% pass rate)**
+- ✅ Docker deployment
+- ✅ Complete documentation
 
 ## Tech Stack
 
+**Backend:**
 - Python 3.13
+- FastAPI (REST API)
 - LangChain (RAG orchestration)
 - ChromaDB (vector store)
 - Sentence Transformers (local embeddings - all-MiniLM-L6-v2)
-- Ollama + Llama 3.2 (local LLM)
-- PyPDF (PDF processing)
+- Ollama + Llama 3.2 3B (local LLM)
+- BM25 (keyword search)
+
+**Frontend:**
+- Streamlit (web UI)
+- Plotly (interactive charts)
+
+**Testing:**
+- Pytest (26 unit tests, 100% pass rate)
+- pytest-cov (coverage reporting)
+
+**Deployment:**
+- Docker & Docker Compose
+- Uvicorn (ASGI server)
 
 ## Setup
 
@@ -89,6 +105,44 @@ Portfolio project demonstrating advanced ML/RAG engineering for ML Engineer role
 
 ## 🚀 Quick Start
 
+### Option 1: Web Interface (Recommended)
+
+Start the API and web UI:
+
+```bash
+./start_services.sh
+```
+
+Then open your browser:
+- **Web UI:** http://localhost:8501
+- **API Docs:** http://localhost:8000/docs
+
+### Option 2: Command Line
+
+Run the interactive CLI:
+
+```bash
+python3 main.py
+```
+
+Commands:
+```bash
+💬 Your question: What is CAN protocol?
+# Or use commands:
+/switch   # Change domain
+/stats    # View statistics
+/help     # Show help
+/quit     # Exit
+```
+
+### Option 3: Docker Deployment
+
+Run everything in containers:
+
+```bash
+docker-compose up -d
+```
+
 ### 1. Add Your Documents
 
 Simply organize your documents in the `data/` folder:
@@ -105,29 +159,6 @@ data/
 ```
 
 **That's it!** The system auto-detects domains from folder names.
-
-### 2. Run the System
-
-```bash
-python3 main.py
-```
-
-The system will:
-- 🔍 Auto-detect all domains
-- 💾 Prompt to index new documents (if needed)
-- 📂 Let you select a domain
-- 💬 Answer your questions with citations
-
-### 3. Interactive Commands
-
-```bash
-💬 Your question: What is CAN protocol?
-# Or use commands:
-/switch   # Change domain
-/stats    # View statistics
-/help     # Show help
-/quit     # Exit
-```
 
 ### Example Queries by Domain
 
@@ -186,19 +217,22 @@ RAGDocumentationAssistant/
 - Domain filtering system
 - Multi-format document processing
 
-**🔜 Week 3: Advanced Features**
-- RAGAS evaluation metrics
-- Hybrid search (semantic + keyword)
-- Query reranking
+**✅ Week 3: Advanced RAG Features (Complete)**
+- Hybrid search (Semantic + BM25)
+- LLM-based query reranking
 - PCA visualization for embeddings
-- Performance optimization
+- Performance optimization & caching
+- Streaming LLM generation
 
-**🔜 Week 4: Production & UI**
+**✅ Week 4: Production Deployment (Complete)**
+- FastAPI backend with 5 endpoints
 - Streamlit web interface
 - Docker containerization
-- API endpoints
-- Deployment guide
-- Documentation
+- Comprehensive documentation
+- Production-ready system
+
+**📚 Documentation:**
+- [Technical Documentation](TECHNICAL_DOCUMENTATION.md) - Complete system architecture, setup guide, and implementation details
 
 ## Author
 

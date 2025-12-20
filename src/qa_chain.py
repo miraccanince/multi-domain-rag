@@ -167,7 +167,8 @@ def ask_question(
     filter_metadata: Dict[str, Any] = None,
     search_method: str = "hybrid",
     use_reranking: bool = True,
-    use_cache: bool = True
+    use_cache: bool = True,
+    stream: bool = True
 ) -> Dict[str, Any]:
     """
     Complete RAG pipeline: retrieve relevant chunks and generate answer.
@@ -180,6 +181,7 @@ def ask_question(
         search_method: Search method - "semantic", "bm25", or "hybrid" (default)
         use_reranking: Whether to use LLM reranking (default: True)
         use_cache: Whether to use query result caching (default: True)
+        stream: Whether to use streaming mode for LLM generation (default: True)
 
     Returns:
         Dictionary with answer, sources, and retrieved chunks
@@ -300,7 +302,7 @@ def ask_question(
     # Step 2: Generate answer
     gen_start = time.time()
     print("Step 2: Generating answer with LLM...")
-    answer = generate_answer_ollama(question, chunks)
+    answer = generate_answer_ollama(question, chunks, stream=stream)
     gen_time = time.time() - gen_start
     print(f"✅ Answer generated ({gen_time:.3f}s)\n")
 

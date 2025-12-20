@@ -2,6 +2,7 @@ from typing import List, Dict, Any
 import chromadb
 from chromadb.config import Settings
 from src.embeddings import create_embedding, create_embeddings_batch
+import uuid
 
 
 def initialize_chroma_db(persist_directory: str = "./chroma_db", collection_name: str = "documents"):
@@ -50,8 +51,8 @@ def index_documents(collection, chunks: List[Any], batch_size: int = 32):
     texts = [chunk.page_content for chunk in chunks]
     metadatas = [chunk.metadata for chunk in chunks]
 
-    # Create unique IDs
-    ids = [f"chunk_{i}" for i in range(len(chunks))]
+    # Create unique IDs using UUID to ensure no collisions across uploads
+    ids = [str(uuid.uuid4()) for _ in range(len(chunks))]
 
     # Create embeddings in batches
     print("Creating embeddings...")

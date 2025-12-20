@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (keep data/ for documents)
+*.md
+!requirements.txt
+
+# Notebooks (optional - exclude for smaller image)
+notebooks/
+visualizations/
+*.ipynb
+
+# Tests
+tests/
+*.pytest_cache/
+
+# Temporary files
+*.log
+*.tmp
+.cache/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore

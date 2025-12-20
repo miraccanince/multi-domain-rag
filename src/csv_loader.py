@@ -16,16 +16,12 @@ def load_csv_as_documents(csv_path: str, text_columns: List[str] = None, domain:
     Args:
         csv_path: Path to CSV file
         text_columns: Columns to combine into document text.
-                      If None, uses ['BrandName', 'Deatils', 'Sizes', 'Category']
+                      If None, auto-detects all text columns
         domain: Domain name to add to metadata (auto-detected from folder name if None)
 
     Returns:
         List of Document objects with product information
     """
-
-    # Default columns for text content
-    if text_columns is None:
-        text_columns = ['BrandName', 'Deatils', 'Sizes', 'Category']
 
     # Auto-detect domain from folder name
     if domain is None:
@@ -35,8 +31,21 @@ def load_csv_as_documents(csv_path: str, text_columns: List[str] = None, domain:
     print(f"Loading CSV: {csv_path}")
     df = pd.read_csv(csv_path)
 
-    # Drop rows with missing critical data
-    df = df.dropna(subset=['BrandName', 'Deatils'])
+    # Auto-detect text columns if not specified
+    if text_columns is None:
+        # Fashion domain: use specific columns
+        if domain == 'fashion' and 'BrandName' in df.columns:
+            text_columns = ['BrandName', 'Deatils', 'Sizes', 'Category']
+        else:
+            # Generic: use all non-numeric columns except 'id'
+            text_columns = [col for col in df.columns
+                          if col.lower() not in ['id', 'index']
+                          and df[col].dtype == 'object']
+
+    print(f"Using text columns: {text_columns}")
+
+    # Drop rows where ALL text columns are NaN (keep if at least one has value)
+    df = df.dropna(subset=text_columns, how='all')
 
     print(f"Found {len(df)} valid products")
 
@@ -58,18 +67,28 @@ def load_csv_as_documents(csv_path: str, text_columns: List[str] = None, domain:
 
         text_content = "\n".join(text_parts)
 
-        # Create metadata with all columns
+        # Create metadata - generic for any CSV
         metadata = {
             'source': csv_path,
             'source_type': 'csv',
             'domain': domain,
-            'row_id': str(idx),
-            'brand': str(row.get('BrandName', '')),
-            'category': str(row.get('Category', '')),
-            'sell_price': str(row.get('SellPrice', '')),
-            'mrp': str(row.get('MRP', '')),
-            'discount': str(row.get('Discount', ''))
+            'row_id': str(idx)
         }
+
+        # Add fashion-specific metadata if available
+        if domain == 'fashion':
+            metadata.update({
+                'brand': str(row.get('BrandName', '')),
+                'category': str(row.get('Category', '')),
+                'sell_price': str(row.get('SellPrice', '')),
+                'mrp': str(row.get('MRP', '')),
+                'discount': str(row.get('Discount', ''))
+            })
+        else:
+            # For other domains, add all available columns as metadata
+            for col in df.columns:
+                if col.lower() not in ['id', 'index'] and pd.notna(row.get(col)):
+                    metadata[col.lower()] = str(row[col])
 
         doc = Document(
             page_content=text_content,
