@@ -74,9 +74,30 @@ st.markdown("""
         font-size: 1.1rem;
         line-height: 1.6;
         padding: 1rem;
-        background-color: #000;
+        background-color: #f8f9fa;
         border-radius: 8px;
         border-left: 4px solid #667eea;
+        color: #1e1e1e;
+    }
+
+    /* Chat history */
+    .chat-message {
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+        color: #1e1e1e;
+    }
+
+    .user-message {
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        color: #0d47a1;
+    }
+
+    .assistant-message {
+        background-color: #f1f8e9;
+        border-left: 4px solid #8bc34a;
+        color: #33691e;
     }
 
     /* Source boxes */
@@ -227,6 +248,10 @@ def display_sources(sources: List[Dict[str, Any]]):
 def render_chat_tab(health: Dict, domains_data: List[Dict]):
     """Render the main chat interface."""
 
+    # Initialize chat history in session state
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
     # Domain selection in chat
     col1, col2, col3 = st.columns([2, 1, 1])
 
@@ -246,6 +271,15 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
 
     with col3:
         n_results = st.slider("Results", 1, 10, 3, key="chat_results")
+
+    # Chat History Display
+    if st.session_state.chat_history:
+        with st.expander(f"📜 Chat History ({len(st.session_state.chat_history)} messages)", expanded=False):
+            for i, chat in enumerate(reversed(st.session_state.chat_history)):
+                st.markdown(f'<div class="chat-message user-message"><strong>You ({chat["timestamp"]}):</strong> {chat["question"]}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="chat-message assistant-message"><strong>FlexiRAG:</strong> {chat["answer"][:200]}{"..." if len(chat["answer"]) > 200 else ""}</div>', unsafe_allow_html=True)
+                if i < len(st.session_state.chat_history) - 1:
+                    st.divider()
 
     # Example questions
     with st.expander("💡 Example Questions"):
@@ -285,12 +319,16 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
     if 'question' in st.session_state and st.session_state.question == question:
         del st.session_state.question
 
-    # Query Button
-    col1, col2 = st.columns([3, 1])
+    # Query Button & Clear History
+    col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
         search_button = st.button("🔍 Search", type="primary", use_container_width=True)
     with col2:
         use_streaming = st.checkbox("Stream", value=True)
+    with col3:
+        if st.button("🗑️ Clear Chat", use_container_width=True):
+            st.session_state.chat_history = []
+            st.rerun()
 
     if search_button:
         if not question.strip():
@@ -338,6 +376,15 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                             except json.JSONDecodeError:
                                 continue
 
+                    # Save to chat history
+                    if answer_text:
+                        st.session_state.chat_history.append({
+                            "question": question,
+                            "answer": answer_text,
+                            "timestamp": datetime.now().strftime("%H:%M:%S"),
+                            "domain": selected_domain
+                        })
+
                     # Display sources
                     if sources:
                         st.divider()
@@ -354,6 +401,14 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                 if result:
                     st.subheader("💡 Answer")
                     st.markdown(f'<div class="streaming-text">{result["answer"]}</div>', unsafe_allow_html=True)
+
+                    # Save to chat history
+                    st.session_state.chat_history.append({
+                        "question": question,
+                        "answer": result["answer"],
+                        "timestamp": datetime.now().strftime("%H:%M:%S"),
+                        "domain": selected_domain
+                    })
 
                     if "sources" in result:
                         st.divider()
