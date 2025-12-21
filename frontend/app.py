@@ -19,6 +19,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from typing import Dict, List, Any, Optional
 from datetime import datetime
+import streamlit_cookies_manager
 
 # Page configuration
 st.set_page_config(
@@ -31,13 +32,26 @@ st.set_page_config(
 # API Configuration
 API_BASE_URL = "http://localhost:8000"
 
-# Session State Initialization
+# Initialize cookies manager
+cookies = streamlit_cookies_manager.EncryptedCookieManager(
+    prefix="flexirag_",
+    password="flexirag-secret-key-change-in-production"
+)
+
+if not cookies.ready():
+    st.stop()
+
+# Session State Initialization - restore from cookies if available
 if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-if 'token' not in st.session_state:
-    st.session_state.token = None
-if 'user' not in st.session_state:
-    st.session_state.user = None
+    # Try to restore from cookie
+    if cookies.get('token'):
+        st.session_state.authenticated = True
+        st.session_state.token = cookies.get('token')
+        st.session_state.user = json.loads(cookies.get('user', '{}'))
+    else:
+        st.session_state.authenticated = False
+        st.session_state.token = None
+        st.session_state.user = None
 
 # Enhanced Custom CSS
 st.markdown("""
@@ -192,6 +206,12 @@ def login_user(username: str, password: str) -> tuple[bool, str, Optional[Dict]]
             st.session_state.authenticated = True
             st.session_state.token = data['access_token']
             st.session_state.user = data['user']
+
+            # Save to cookies for persistence
+            cookies['token'] = data['access_token']
+            cookies['user'] = json.dumps(data['user'])
+            cookies.save()
+
             return True, "Login successful!", data['user']
         else:
             error_msg = response.json().get('detail', 'Login failed')
@@ -205,6 +225,14 @@ def logout_user():
     st.session_state.authenticated = False
     st.session_state.token = None
     st.session_state.user = None
+
+    # Clear cookies
+    if 'token' in cookies:
+        del cookies['token']
+    if 'user' in cookies:
+        del cookies['user']
+    cookies.save()
+
     st.rerun()
 
 

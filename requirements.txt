@@ -26,6 +26,7 @@ slowapi>=0.1.9  # Rate limiting for API endpoints
 python-jose[cryptography]>=3.3.0  # JWT token handling
 passlib[bcrypt]>=1.7.4  # Password hashing
 streamlit>=1.29.0  # Web UI frontend
+streamlit-cookies-manager>=0.2.0  # Cookie management for session persistence
 plotly>=5.18.0  # Interactive charts for analytics dashboard
 
 # Testing
