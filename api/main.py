@@ -11,11 +11,14 @@ Usage:
     uvicorn api.main:app --reload --port 8000
 """
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import json
 import chromadb
 from pathlib import Path
@@ -33,12 +36,19 @@ from src.hybrid_search import HybridSearchEngine
 from src.cache_manager import get_query_cache, get_performance_monitor
 from src.feedback_manager import get_feedback_manager
 
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
+
 # Initialize FastAPI app
 app = FastAPI(
     title="RAG Documentation Assistant API",
     description="Retrieval-Augmented Generation API for document Q&A",
     version="1.0.0"
 )
+
+# Add rate limiter to app
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware for frontend access
 app.add_middleware(
@@ -161,7 +171,8 @@ async def root():
 
 
 @app.post("/query", response_model=QueryResponse, tags=["Question Answering"])
-async def query_documents(request: QueryRequest):
+@limiter.limit("10/minute")
+async def query_documents(request: Request, query_request: QueryRequest):
     """
     Full RAG pipeline: retrieve relevant documents and generate answer with LLM.
 
@@ -169,10 +180,10 @@ async def query_documents(request: QueryRequest):
     """
     try:
         # Build filter metadata
-        filter_metadata = {"domain": request.domain} if request.domain else None
+        filter_metadata = {"domain": query_request.domain} if query_request.domain else None
 
         # For streaming, return StreamingResponse
-        if request.stream:
+        if query_request.stream:
             async def generate_streaming_response():
                 """Generator for streaming LLM response."""
                 start_time = time.time()
@@ -182,31 +193,31 @@ async def query_documents(request: QueryRequest):
                 from src.reranker import rerank_chunks
 
                 search_start = time.time()
-                initial_n = request.n_results * 3 if request.use_reranking else request.n_results
+                initial_n = query_request.n_results * 3 if query_request.use_reranking else query_request.n_results
 
-                if request.search_method in ["hybrid", "bm25"]:
+                if query_request.search_method in ["hybrid", "bm25"]:
                     results = hybrid_engine.search(
-                        query=request.question,
+                        query=query_request.question,
                         n_results=initial_n,
-                        domain=request.domain,
-                        method=request.search_method
+                        domain=query_request.domain,
+                        method=query_request.search_method
                     )
                     chunks = [r['document'] for r in results]
                     metadatas = [r['metadata'] for r in results]
                 else:
-                    results = query_similar_chunks(collection, request.question, n_results=initial_n, filter_metadata=filter_metadata)
+                    results = query_similar_chunks(collection, query_request.question, n_results=initial_n, filter_metadata=filter_metadata)
                     chunks = results['documents'][0]
                     metadatas = results['metadatas'][0]
 
                 search_time = time.time() - search_start
 
                 # Rerank if enabled
-                if request.use_reranking and len(chunks) > request.n_results:
+                if query_request.use_reranking and len(chunks) > query_request.n_results:
                     chunks, metadatas = rerank_chunks(
-                        query=request.question,
+                        query=query_request.question,
                         chunks=chunks,
                         metadatas=metadatas,
-                        top_k=request.n_results,
+                        top_k=query_request.n_results,
                         method="ollama"
                     )
 
@@ -232,7 +243,7 @@ async def query_documents(request: QueryRequest):
 Context:
 {context}
 
-Question: {request.question}
+Question: {query_request.question}
 
 Instructions:
 - Be concise (2-3 sentences max)
@@ -310,12 +321,12 @@ Answer:"""
             # Non-streaming mode
             result = ask_question(
                 collection=collection,
-                question=request.question,
-                n_results=request.n_results,
+                question=query_request.question,
+                n_results=query_request.n_results,
                 filter_metadata=filter_metadata,
-                search_method=request.search_method,
-                use_reranking=request.use_reranking,
-                use_cache=request.use_cache,
+                search_method=query_request.search_method,
+                use_reranking=query_request.use_reranking,
+                use_cache=query_request.use_cache,
                 stream=False
             )
 
@@ -324,8 +335,8 @@ Answer:"""
                 answer=result["answer"],
                 sources=result["sources"],
                 metadata={
-                    "search_method": request.search_method,
-                    "reranking_used": request.use_reranking,
+                    "search_method": query_request.search_method,
+                    "reranking_used": query_request.use_reranking,
                     "chunks_retrieved": len(result["retrieved_chunks"])
                 }
             )
@@ -335,28 +346,29 @@ Answer:"""
 
 
 @app.post("/search", response_model=SearchResponse, tags=["Search"])
-async def search_documents(request: SearchRequest):
+@limiter.limit("20/minute")
+async def search_documents(request: Request, search_request: SearchRequest):
     """
     Search for relevant documents without LLM generation.
 
     Returns raw search results with metadata.
     """
     try:
-        if request.search_method in ["hybrid", "bm25"]:
+        if search_request.search_method in ["hybrid", "bm25"]:
             results = hybrid_engine.search(
-                query=request.query,
-                n_results=request.n_results,
-                domain=request.domain,
-                method=request.search_method
+                query=search_request.query,
+                n_results=search_request.n_results,
+                domain=search_request.domain,
+                method=search_request.search_method
             )
         else:
             # Semantic search
-            filter_metadata = {"domain": request.domain} if request.domain else None
+            filter_metadata = {"domain": search_request.domain} if search_request.domain else None
             from src.vector_store import query_similar_chunks
             chroma_results = query_similar_chunks(
                 collection,
-                request.query,
-                n_results=request.n_results,
+                search_request.query,
+                n_results=search_request.n_results,
                 filter_metadata=filter_metadata
             )
 
@@ -370,11 +382,11 @@ async def search_documents(request: SearchRequest):
             ]
 
         return SearchResponse(
-            query=request.query,
+            query=search_request.query,
             results=results,
             metadata={
-                "search_method": request.search_method,
-                "domain": request.domain,
+                "search_method": search_request.search_method,
+                "domain": search_request.domain,
                 "total_results": len(results)
             }
         )
@@ -452,7 +464,8 @@ async def health_check():
 
 
 @app.post("/feedback", tags=["Feedback"])
-async def submit_feedback(request: FeedbackRequest):
+@limiter.limit("30/minute")
+async def submit_feedback(request: Request, feedback_request: FeedbackRequest):
     """
     Submit user feedback for an answer.
 
@@ -464,12 +477,12 @@ async def submit_feedback(request: FeedbackRequest):
 
         # Save feedback
         feedback_entry = feedback_mgr.save_feedback(
-            question=request.question,
-            answer=request.answer,
-            rating=request.rating,
-            comment=request.comment,
-            domain=request.domain,
-            metadata=request.metadata or {}
+            question=feedback_request.question,
+            answer=feedback_request.answer,
+            rating=feedback_request.rating,
+            comment=feedback_request.comment,
+            domain=feedback_request.domain,
+            metadata=feedback_request.metadata or {}
         )
 
         return {
@@ -548,7 +561,9 @@ async def export_feedback(
 
 
 @app.post("/upload", tags=["Upload"])
+@limiter.limit("5/minute")
 async def upload_document(
+    request: Request,
     file: UploadFile = File(...),
     domain: str = Form(...)
 ):
