@@ -38,5 +38,45 @@
     "comment": null,
     "domain": "All",
     "metadata": {}
+  },
+  {
+    "id": "fb_20251221195752135285",
+    "timestamp": "2025-12-21T19:57:52.135297",
+    "question": "what is can protocol? ",
+    "answer": "The CAN (Controller Area Network) protocol is a vehicle bus standard for controlling and communicating electronic control units (ECUs) in vehicles. It uses a star topology and has a limited network speed of 1 Mbit/s [Document 3]. The CAN FD (Flexible Data-Rate) variant, released in 2012, addresses limitations of the original CAN protocol by increasing data rates and resolving errors [Document 3].",
+    "rating": 1,
+    "comment": null,
+    "domain": "automotive",
+    "metadata": {}
+  },
+  {
+    "id": "fb_20251221200205148447",
+    "timestamp": "2025-12-21T20:02:05.148464",
+    "question": "what is can protocol?",
+    "answer": "The CAN protocol is a vehicle bus standard for controlling and communicating electronic control units (ECUs) in vehicles. It has two sub-protocols: CAN FD (Flexible Data-Rate) which was released in 2012 to resolve speed limitations, and the original CAN (Controller Area Network).",
+    "rating": 1,
+    "comment": null,
+    "domain": "All",
+    "metadata": {}
+  },
+  {
+    "id": "fb_20251221200708464686",
+    "timestamp": "2025-12-21T20:07:08.464702",
+    "question": "\u201cHow can I establish reliable communication between the ECUs in an electric vehicle?\u201d",
+    "answer": "To establish reliable communication between ECUs in an electric vehicle, utilize a CAN bus system, which is widely used and offers benefits such as reducing errors, weight, wiring, and costs (Document 3). Additionally, consider implementing UDS-based protocols like WWH-OBD or OBDonUDS, which are expected to replace OBD2 as the de facto standard for vehicle diagnostics (Documents 1 and 2).",
+    "rating": 1,
+    "comment": null,
+    "domain": "All",
+    "metadata": {}
+  },
+  {
+    "id": "fb_20251221220211846929",
+    "timestamp": "2025-12-21T22:02:11.846954",
+    "question": "How can I establish reliable communication between the ECUs in an electric vehicle?",
+    "answer": "To establish reliable communication between ECUs in an electric vehicle, use a Central Gateway (CGW) to act as a bridge between the tester-tool (client) and the vehicle ECU (server). This allows for standardized UDS communication, reducing errors and costs associated with direct analogue signal lines. [Document 1]",
+    "rating": 1,
+    "comment": null,
+    "domain": "All",
+    "metadata": {}
   }
 ]

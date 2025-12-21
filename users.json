@@ -1,0 +1,20 @@
+{
+  "testuser": {
+    "username": "testuser",
+    "hashed_password": "$2b$12$oDvWf03iVe10vTNeMUNj0ec8krhZdE5AcS9TeVVWCBP81aBEJq9KK",
+    "email": "test@example.com",
+    "full_name": "Test User",
+    "created_at": "2025-12-21T19:40:48.593951",
+    "is_active": true,
+    "is_admin": false
+  },
+  "admin": {
+    "username": "admin",
+    "hashed_password": "$2b$12$fF7X6/44lzWnilKL4klBUeIar8QY9WjZ.qLJyDqUBJqo5nwVeBkVO",
+    "email": null,
+    "full_name": null,
+    "created_at": "2025-12-21T19:47:08.906974",
+    "is_active": true,
+    "is_admin": false
+  }
+}
