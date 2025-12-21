@@ -11,9 +11,10 @@ Usage:
     uvicorn api.main:app --reload --port 8000
 """
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -37,6 +38,7 @@ from src.cache_manager import get_query_cache, get_performance_monitor
 from src.feedback_manager import get_feedback_manager
 from src.semantic_cache import get_semantic_cache
 from src.embeddings import create_embedding
+from src.auth import get_user_manager, create_access_token, verify_token
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -65,6 +67,41 @@ app.add_middleware(
 chroma_client = None
 collection = None
 hybrid_engine = None
+
+# OAuth2 scheme for token authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
+
+
+# Authentication dependency
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> Optional[Dict[str, Any]]:
+    """
+    Get current authenticated user from JWT token.
+
+    Returns None if no token or invalid token (allows optional authentication).
+    """
+    if not token:
+        return None
+
+    username = verify_token(token)
+    if not username:
+        return None
+
+    user_manager = get_user_manager()
+    user = user_manager.get_user(username)
+    return user
+
+
+async def require_auth(current_user: Optional[Dict[str, Any]] = Depends(get_current_user)) -> Dict[str, Any]:
+    """
+    Require authentication (raises 401 if not authenticated).
+    """
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return current_user
 
 
 # Request/Response Models
@@ -118,6 +155,27 @@ class FeedbackRequest(BaseModel):
     comment: Optional[str] = Field(None, description="Optional user comment")
     domain: Optional[str] = Field(None, description="Domain used for query")
     metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
+
+
+class RegisterRequest(BaseModel):
+    username: str = Field(..., description="Unique username", min_length=3, max_length=50)
+    password: str = Field(..., description="Password", min_length=6)
+    email: Optional[str] = Field(None, description="Email address")
+    full_name: Optional[str] = Field(None, description="Full name")
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: Dict[str, Any]
+
+
+class UserResponse(BaseModel):
+    username: str
+    email: Optional[str]
+    full_name: Optional[str]
+    created_at: str
+    is_active: bool
 
 
 # Startup/Shutdown Events
@@ -608,10 +666,13 @@ async def export_feedback(
 async def upload_document(
     request: Request,
     file: UploadFile = File(...),
-    domain: str = Form(...)
+    domain: str = Form(...),
+    current_user: Dict[str, Any] = Depends(require_auth)
 ):
     """
     Upload a document (PDF or CSV) and index it.
+
+    Requires: Authentication
 
     Args:
         file: The file to upload (PDF or CSV)
@@ -704,9 +765,14 @@ async def upload_document(
 
 
 @app.delete("/domain/{domain_name}", tags=["Delete"])
-async def delete_domain(domain_name: str):
+async def delete_domain(
+    domain_name: str,
+    current_user: Dict[str, Any] = Depends(require_auth)
+):
     """
     Delete an entire domain and all its documents.
+
+    Requires: Authentication
 
     Args:
         domain_name: The name of the domain to delete
@@ -759,6 +825,126 @@ async def delete_domain(domain_name: str):
 
     except HTTPException:
         raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Authentication Endpoints
+
+@app.post("/auth/register", response_model=UserResponse, tags=["Authentication"])
+async def register(register_data: RegisterRequest):
+    """
+    Register a new user account.
+
+    Args:
+        register_data: User registration data (username, password, email, full_name)
+
+    Returns:
+        Created user information (without password)
+
+    Raises:
+        400: If username already exists
+    """
+    try:
+        user_manager = get_user_manager()
+
+        user = user_manager.create_user(
+            username=register_data.username,
+            password=register_data.password,
+            email=register_data.email,
+            full_name=register_data.full_name
+        )
+
+        return UserResponse(**user)
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/auth/login", response_model=LoginResponse, tags=["Authentication"])
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Login with username and password.
+
+    Args:
+        form_data: OAuth2 form with username and password
+
+    Returns:
+        JWT access token and user information
+
+    Raises:
+        401: If credentials are invalid
+    """
+    try:
+        user_manager = get_user_manager()
+
+        # Authenticate user
+        user = user_manager.authenticate_user(
+            username=form_data.username,
+            password=form_data.password
+        )
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Create access token
+        from datetime import timedelta
+        access_token = create_access_token(
+            data={"sub": user['username']},
+            expires_delta=timedelta(minutes=1440)  # 24 hours
+        )
+
+        return LoginResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user=user
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/auth/me", response_model=UserResponse, tags=["Authentication"])
+async def get_current_user_info(current_user: Dict[str, Any] = Depends(require_auth)):
+    """
+    Get current authenticated user information.
+
+    Requires: Valid JWT token
+
+    Returns:
+        Current user information
+    """
+    return UserResponse(**current_user)
+
+
+@app.get("/auth/users", tags=["Authentication"])
+async def list_users(current_user: Dict[str, Any] = Depends(require_auth)):
+    """
+    List all registered users.
+
+    Requires: Authentication
+
+    Returns:
+        List of all users (without passwords)
+    """
+    try:
+        user_manager = get_user_manager()
+        users = user_manager.get_all_users()
+
+        return {
+            "status": "success",
+            "total_users": len(users),
+            "users": users
+        }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
