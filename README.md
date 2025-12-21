@@ -1,5 +1,9 @@
 # FlexiRAG - Dynamic Multi-Domain RAG Framework
 
+![Tests](https://github.com/YOUR_USERNAME/RAGDocumentationAssistant/actions/workflows/tests.yml/badge.svg)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Tests: 37 passed](https://img.shields.io/badge/tests-37%20passed-brightgreen.svg)](tests/)
+
 A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that automatically adapts to any domain. Perfect for companies wanting to deploy RAG systems with their own documents - zero code changes required!
 
 ## 🎯 What Makes This Different?
