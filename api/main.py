@@ -35,6 +35,8 @@ from src.qa_chain import ask_question, warm_up_model, generate_answer_ollama
 from src.hybrid_search import HybridSearchEngine
 from src.cache_manager import get_query_cache, get_performance_monitor
 from src.feedback_manager import get_feedback_manager
+from src.semantic_cache import get_semantic_cache
+from src.embeddings import create_embedding
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -181,6 +183,27 @@ async def query_documents(request: Request, query_request: QueryRequest):
     try:
         # Build filter metadata
         filter_metadata = {"domain": query_request.domain} if query_request.domain else None
+
+        # Check semantic cache (if enabled)
+        query_embedding = None
+        if query_request.use_cache:
+            semantic_cache = get_semantic_cache()
+            query_embedding = create_embedding(query_request.question)
+
+            cached_result = semantic_cache.get(
+                query=query_request.question,
+                query_embedding=query_embedding,
+                domain=query_request.domain
+            )
+
+            if cached_result:
+                # Return cached result immediately
+                return QueryResponse(
+                    question=query_request.question,
+                    answer=cached_result['answer'],
+                    sources=cached_result['sources'],
+                    metadata=cached_result['metadata']
+                )
 
         # For streaming, return StreamingResponse
         if query_request.stream:
@@ -330,6 +353,21 @@ Answer:"""
                 stream=False
             )
 
+            # Store in semantic cache (if enabled and not already cached)
+            if query_request.use_cache and query_embedding is not None:
+                semantic_cache = get_semantic_cache()
+                semantic_cache.set(
+                    query=query_request.question,
+                    query_embedding=query_embedding,
+                    answer=result["answer"],
+                    sources=result["sources"],
+                    domain=query_request.domain,
+                    metadata={
+                        "search_method": query_request.search_method,
+                        "reranking_used": query_request.use_reranking
+                    }
+                )
+
             return QueryResponse(
                 question=result["question"],
                 answer=result["answer"],
@@ -449,6 +487,11 @@ async def health_check():
         # Get cache and performance stats
         cache = get_query_cache()
         monitor = get_performance_monitor()
+        semantic_cache = get_semantic_cache()
+
+        # Combine performance stats with semantic cache stats
+        perf_stats = monitor.get_stats()
+        perf_stats['semantic_cache'] = semantic_cache.get_stats()
 
         return HealthResponse(
             status="healthy" if (ollama_running and database_ready) else "degraded",
@@ -456,7 +499,7 @@ async def health_check():
             database_ready=database_ready,
             documents_indexed=collection.count() if collection else 0,
             cache_size=len(cache.cache),
-            performance_stats=monitor.get_stats()
+            performance_stats=perf_stats
         )
 
     except Exception as e:
