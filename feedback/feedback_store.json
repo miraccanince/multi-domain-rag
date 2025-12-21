@@ -1,0 +1,42 @@
+[
+  {
+    "id": "fb_20251221123350979244",
+    "timestamp": "2025-12-21T12:33:50.979262",
+    "question": "Test question",
+    "answer": "Test answer",
+    "rating": 1,
+    "comment": "Great answer!",
+    "domain": "automotive",
+    "metadata": {}
+  },
+  {
+    "id": "fb_20251221133140376849",
+    "timestamp": "2025-12-21T13:31:40.376924",
+    "question": "What is OBD-II?",
+    "answer": "OBD-II is an automotive diagnostic system",
+    "rating": -1,
+    "comment": "Not detailed enough",
+    "domain": "automotive",
+    "metadata": {}
+  },
+  {
+    "id": "fb_20251221133222537487",
+    "timestamp": "2025-12-21T13:32:22.537500",
+    "question": "can fd or can is better?",
+    "answer": "There is no direct comparison between \"CAN FD\" and \"CAN\". However, CAN FD was introduced as a future-proof solution to resolve limitations of the existing Classical CAN protocol (Document 2). It allows for a gradual migration towards a fully CAN FD system (Document 3), rather than making drastic changes at once.",
+    "rating": 1,
+    "comment": null,
+    "domain": "All",
+    "metadata": {}
+  },
+  {
+    "id": "fb_20251221133237176550",
+    "timestamp": "2025-12-21T13:32:37.176562",
+    "question": "what is can ?",
+    "answer": "CAN stands for Controller Area Network, a protocol used for communication between electronic devices. According to Document 2, it was pre-developed by Bosch and released in 2012, aiming to resolve issues with network speed limitations. (Document 2)",
+    "rating": -1,
+    "comment": null,
+    "domain": "All",
+    "metadata": {}
+  }
+]

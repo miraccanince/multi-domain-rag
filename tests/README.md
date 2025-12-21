@@ -43,6 +43,18 @@ Tests for CSV document loading:
 - NaN value handling
 - Domain metadata
 
+### ✅ test_feedback_manager.py (11 tests)
+Tests for user feedback system:
+- Saving positive/negative feedback
+- Feedback statistics calculation
+- Domain-level feedback breakdown
+- Recent feedback retrieval
+- Negative feedback filtering
+- Answer truncation
+- Metadata storage
+- Persistence across instances
+- Unique ID generation
+
 ## Running Tests
 
 ### Run all tests:
@@ -69,7 +81,7 @@ pytest tests/test_embeddings.py::TestEmbeddings::test_create_single_embedding -v
 
 ```
 ============================= test session starts ==============================
-collected 26 items
+collected 37 items
 
 tests/test_cache_manager.py::TestCacheManager::test_cache_set_and_get PASSED
 tests/test_cache_manager.py::TestCacheManager::test_cache_miss PASSED
@@ -90,6 +102,17 @@ tests/test_embeddings.py::TestEmbeddings::test_create_embedding_empty_string PAS
 tests/test_embeddings.py::TestEmbeddings::test_create_embeddings_batch PASSED
 tests/test_embeddings.py::TestEmbeddings::test_embedding_similarity PASSED
 tests/test_embeddings.py::TestEmbeddings::test_batch_size_parameter PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_save_feedback PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_negative_feedback PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_get_statistics_empty PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_get_statistics PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_domain_breakdown PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_get_recent_feedback PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_get_negative_feedback PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_answer_truncation PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_metadata_storage PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_persistence PASSED
+tests/test_feedback_manager.py::TestFeedbackManager::test_unique_ids PASSED
 tests/test_vector_store.py::TestVectorStore::test_initialize_chroma_db PASSED
 tests/test_vector_store.py::TestVectorStore::test_index_documents PASSED
 tests/test_vector_store.py::TestVectorStore::test_query_similar_chunks PASSED
@@ -98,7 +121,7 @@ tests/test_vector_store.py::TestVectorStore::test_get_collection_stats PASSED
 tests/test_vector_store.py::TestVectorStore::test_get_available_domains PASSED
 tests/test_vector_store.py::TestVectorStore::test_uuid_based_ids PASSED
 
-======================= 26 passed in 7.36s =================================
+======================= 37 passed in 8.52s =================================
 ```
 
 ## Coverage Report
@@ -116,13 +139,14 @@ tests/test_vector_store.py::TestVectorStore::test_uuid_based_ids PASSED
 
 ```
 tests/
-├── __init__.py           # Test package init
-├── conftest.py          # Pytest configuration & fixtures
-├── test_embeddings.py   # Embedding tests
-├── test_vector_store.py # Vector store tests
-├── test_cache_manager.py # Cache tests
-├── test_csv_loader.py   # CSV loader tests
-└── README.md           # This file
+├── __init__.py              # Test package init
+├── conftest.py              # Pytest configuration & fixtures
+├── test_embeddings.py       # Embedding tests (5 tests)
+├── test_vector_store.py     # Vector store tests (7 tests)
+├── test_cache_manager.py    # Cache tests (8 tests)
+├── test_csv_loader.py       # CSV loader tests (6 tests)
+├── test_feedback_manager.py # Feedback system tests (11 tests)
+└── README.md                # This file
 ```
 
 ## Writing New Tests
@@ -174,6 +198,6 @@ Planned test additions:
 - [ ] API endpoint tests (integration)
 - [ ] PDF loader tests
 - [ ] Hybrid search tests
-- [ ] QA chain tests
 - [ ] Reranker tests
+- [ ] QA chain tests
 - [ ] End-to-end tests

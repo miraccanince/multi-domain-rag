@@ -17,13 +17,13 @@ import requests
 import json
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 
 # Page configuration
 st.set_page_config(
     page_title="FlexiRAG - Dynamic Multi-Domain RAG Framework",
-    page_icon="🚀",
+    page_icon="📄",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -218,6 +218,36 @@ def query_documents_non_streaming(question: str, domain: str = None, n_results: 
         return None
 
 
+def submit_feedback(question: str, answer: str, rating: int, domain: Optional[str] = None, comment: Optional[str] = None):
+    """Submit user feedback to the API."""
+    payload = {
+        "question": question,
+        "answer": answer,
+        "rating": rating,
+        "domain": domain,
+        "comment": comment
+    }
+
+    try:
+        response = requests.post(f"{API_BASE_URL}/feedback", json=payload, timeout=10)
+        return response.status_code == 200
+    except Exception as e:
+        st.error(f"Error submitting feedback: {e}")
+        return False
+
+
+def get_feedback_stats():
+    """Get feedback statistics from the API."""
+    try:
+        response = requests.get(f"{API_BASE_URL}/feedback/stats", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        return None
+    except Exception as e:
+        st.error(f"Error fetching feedback stats: {e}")
+        return None
+
+
 def display_sources(sources: List[Dict[str, Any]]):
     """Display source documents with metadata."""
     st.subheader("📄 Sources")
@@ -251,6 +281,14 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
     # Initialize chat history in session state
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
+
+    # Initialize last answer/question for feedback
+    if 'last_answer' not in st.session_state:
+        st.session_state.last_answer = None
+    if 'last_question' not in st.session_state:
+        st.session_state.last_question = None
+    if 'last_domain' not in st.session_state:
+        st.session_state.last_domain = None
 
     # Domain selection in chat
     col1, col2, col3 = st.columns([2, 1, 1])
@@ -376,7 +414,7 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                             except json.JSONDecodeError:
                                 continue
 
-                    # Save to chat history
+                    # Save to chat history and session state for feedback
                     if answer_text:
                         st.session_state.chat_history.append({
                             "question": question,
@@ -384,6 +422,11 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                             "timestamp": datetime.now().strftime("%H:%M:%S"),
                             "domain": selected_domain
                         })
+
+                        # Save for feedback buttons
+                        st.session_state.last_answer = answer_text
+                        st.session_state.last_question = question
+                        st.session_state.last_domain = selected_domain
 
                     # Display sources
                     if sources:
@@ -402,7 +445,7 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                     st.subheader("💡 Answer")
                     st.markdown(f'<div class="streaming-text">{result["answer"]}</div>', unsafe_allow_html=True)
 
-                    # Save to chat history
+                    # Save to chat history and session state for feedback
                     st.session_state.chat_history.append({
                         "question": question,
                         "answer": result["answer"],
@@ -410,9 +453,42 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                         "domain": selected_domain
                     })
 
+                    # Save for feedback buttons
+                    st.session_state.last_answer = result["answer"]
+                    st.session_state.last_question = question
+                    st.session_state.last_domain = selected_domain
+
                     if "sources" in result:
                         st.divider()
                         display_sources(result["sources"])
+
+    # Feedback buttons - always show if there's a last answer
+    if st.session_state.last_answer:
+        st.divider()
+        st.markdown("**Was this answer helpful?**")
+        col1, col2, col3 = st.columns([1, 1, 8])
+
+        with col1:
+            if st.button("👍 Yes", key="thumbs_up"):
+                if submit_feedback(
+                    st.session_state.last_question,
+                    st.session_state.last_answer,
+                    rating=1,
+                    domain=st.session_state.last_domain
+                ):
+                    st.success("Thank you for your feedback!")
+                    st.rerun()
+
+        with col2:
+            if st.button("👎 No", key="thumbs_down"):
+                if submit_feedback(
+                    st.session_state.last_question,
+                    st.session_state.last_answer,
+                    rating=-1,
+                    domain=st.session_state.last_domain
+                ):
+                    st.info("Thank you for your feedback. We'll work to improve!")
+                    st.rerun()
 
 
 # ============================================================================
@@ -541,6 +617,86 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
                 )
         else:
             st.info("No queries executed yet. Try asking some questions to see performance metrics!")
+
+    # Feedback Statistics
+    st.divider()
+    st.markdown("#### 📝 User Feedback Analytics")
+
+    feedback_data = get_feedback_stats()
+
+    if feedback_data and feedback_data.get("status") == "success":
+        stats = feedback_data.get("statistics", {})
+
+        if stats.get("total_feedback", 0) > 0:
+            # Feedback metrics row
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                st.metric(
+                    "Total Feedback",
+                    f"{stats.get('total_feedback', 0):,}"
+                )
+
+            with col2:
+                st.metric(
+                    "👍 Positive",
+                    f"{stats.get('positive', 0):,}",
+                    delta=None
+                )
+
+            with col3:
+                st.metric(
+                    "👎 Negative",
+                    f"{stats.get('negative', 0):,}",
+                    delta=None
+                )
+
+            with col4:
+                satisfaction = stats.get('satisfaction_rate', 0)
+                st.metric(
+                    "Satisfaction Rate",
+                    f"{satisfaction:.1f}%",
+                    delta=None
+                )
+
+            # Domain-level feedback breakdown
+            domain_feedback = stats.get('by_domain', {})
+            if domain_feedback:
+                st.markdown("**Feedback by Domain**")
+
+                domain_names = list(domain_feedback.keys())
+                positive_counts = [domain_feedback[d]['positive'] for d in domain_names]
+                negative_counts = [domain_feedback[d]['negative'] for d in domain_names]
+
+                fig = go.Figure(data=[
+                    go.Bar(name='👍 Positive', x=domain_names, y=positive_counts, marker_color='#4caf50'),
+                    go.Bar(name='👎 Negative', x=domain_names, y=negative_counts, marker_color='#f44336')
+                ])
+
+                fig.update_layout(
+                    barmode='group',
+                    xaxis_title="Domain",
+                    yaxis_title="Feedback Count",
+                    height=300,
+                    showlegend=True
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Recent feedback
+            recent = feedback_data.get("recent_feedback", [])
+            if recent:
+                with st.expander("📋 Recent Feedback (Last 10)"):
+                    for feedback in recent[:10]:
+                        rating_emoji = "👍" if feedback.get('rating', 0) > 0 else "👎"
+                        st.markdown(f"**{rating_emoji} {feedback.get('question', 'N/A')[:50]}...**")
+                        st.caption(f"Domain: {feedback.get('domain', 'N/A')} | Time: {feedback.get('timestamp', 'N/A')}")
+                        if feedback.get('comment'):
+                            st.info(f"Comment: {feedback['comment']}")
+                        st.divider()
+        else:
+            st.info("No feedback received yet. Users can provide feedback after each answer!")
+    else:
+        st.warning("Unable to load feedback statistics.")
 
     # System Information
     st.divider()
@@ -693,7 +849,7 @@ def main():
     """Main application entry point."""
 
     # Header
-    st.markdown('<h1 class="main-header">🚀 FlexiRAG</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">FlexiRAG</h1>', unsafe_allow_html=True)
     st.markdown("**Dynamic Multi-Domain RAG Framework** | Zero-code document intelligence for any domain")
 
     # Get system data
@@ -727,7 +883,7 @@ def main():
     st.markdown("""
     <div class="footer">
         FlexiRAG - Dynamic Multi-Domain RAG Framework | Powered by FastAPI, Streamlit & Ollama<br>
-        Built with ❤️ using Python, ChromaDB, and Llama 3.2 | 100% Free & Local
+        Built using Python, ChromaDB, and Llama 3.2 | 100% Free & Local
     </div>
     """, unsafe_allow_html=True)
 

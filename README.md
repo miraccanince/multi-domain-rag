@@ -46,7 +46,8 @@ Portfolio project demonstrating advanced ML/RAG engineering for ML Engineer role
 - ✅ Performance optimization & caching (360x speedup)
 - ✅ FastAPI backend with streaming
 - ✅ Modern Streamlit web UI with analytics
-- ✅ **Unit tests (26 tests, 100% pass rate)**
+- ✅ User feedback system (thumbs up/down with analytics)
+- ✅ **Unit tests (37 tests, 100% pass rate)**
 - ✅ Docker deployment
 - ✅ Complete documentation
 
@@ -66,7 +67,7 @@ Portfolio project demonstrating advanced ML/RAG engineering for ML Engineer role
 - Plotly (interactive charts)
 
 **Testing:**
-- Pytest (26 unit tests, 100% pass rate)
+- Pytest (37 unit tests, 100% pass rate)
 - pytest-cov (coverage reporting)
 
 **Deployment:**

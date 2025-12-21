@@ -30,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.qa_chain import ask_question, warm_up_model, generate_answer_ollama
 from src.hybrid_search import HybridSearchEngine
 from src.cache_manager import get_query_cache, get_performance_monitor
+from src.feedback_manager import get_feedback_manager
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -95,6 +96,15 @@ class HealthResponse(BaseModel):
 
 class DomainResponse(BaseModel):
     domains: List[Dict[str, Any]]
+
+
+class FeedbackRequest(BaseModel):
+    question: str = Field(..., description="The question that was asked")
+    answer: str = Field(..., description="The answer that was given")
+    rating: int = Field(..., description="User rating: 1 (thumbs up) or -1 (thumbs down)")
+    comment: Optional[str] = Field(None, description="Optional user comment")
+    domain: Optional[str] = Field(None, description="Domain used for query")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
 
 
 # Startup/Shutdown Events
@@ -435,6 +445,59 @@ async def health_check():
             cache_size=len(cache.cache),
             performance_stats=monitor.get_stats()
         )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/feedback", tags=["Feedback"])
+async def submit_feedback(request: FeedbackRequest):
+    """
+    Submit user feedback for an answer.
+
+    Allows users to rate answers with thumbs up/down and optional comments.
+    This data is used to track answer quality and improve the system.
+    """
+    try:
+        feedback_mgr = get_feedback_manager()
+
+        # Save feedback
+        feedback_entry = feedback_mgr.save_feedback(
+            question=request.question,
+            answer=request.answer,
+            rating=request.rating,
+            comment=request.comment,
+            domain=request.domain,
+            metadata=request.metadata or {}
+        )
+
+        return {
+            "status": "success",
+            "message": "Feedback submitted successfully",
+            "feedback_id": feedback_entry["id"]
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/feedback/stats", tags=["Feedback"])
+async def get_feedback_stats():
+    """
+    Get feedback statistics and analytics.
+
+    Returns overall satisfaction rate, domain breakdown, and recent feedback.
+    """
+    try:
+        feedback_mgr = get_feedback_manager()
+        stats = feedback_mgr.get_statistics()
+        recent = feedback_mgr.get_recent_feedback(limit=10)
+
+        return {
+            "status": "success",
+            "statistics": stats,
+            "recent_feedback": recent
+        }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
