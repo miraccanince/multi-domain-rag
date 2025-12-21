@@ -693,6 +693,45 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
                         if feedback.get('comment'):
                             st.info(f"Comment: {feedback['comment']}")
                         st.divider()
+
+            # Export buttons
+            st.markdown("**Export Feedback Data**")
+            col1, col2 = st.columns(2)
+
+            with col1:
+                if st.button("Download as CSV", key="export_csv", use_container_width=True):
+                    try:
+                        response = requests.get(f"{API_BASE_URL}/feedback/export?format=csv", timeout=10)
+                        if response.status_code == 200:
+                            st.download_button(
+                                label="Click to Download CSV",
+                                data=response.content,
+                                file_name=f"feedback_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                                mime="text/csv",
+                                use_container_width=True
+                            )
+                        else:
+                            st.error("Failed to export CSV")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+
+            with col2:
+                if st.button("Download as JSON", key="export_json", use_container_width=True):
+                    try:
+                        response = requests.get(f"{API_BASE_URL}/feedback/export?format=json", timeout=10)
+                        if response.status_code == 200:
+                            st.download_button(
+                                label="Click to Download JSON",
+                                data=response.content,
+                                file_name=f"feedback_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                                mime="application/json",
+                                use_container_width=True
+                            )
+                        else:
+                            st.error("Failed to export JSON")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+
         else:
             st.info("No feedback received yet. Users can provide feedback after each answer!")
     else:

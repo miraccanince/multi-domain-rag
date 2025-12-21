@@ -23,6 +23,8 @@ from typing import Dict, List, Any, Optional
 from pathlib import Path
 from datetime import datetime
 import json
+import csv
+import io
 
 
 class FeedbackManager:
@@ -171,6 +173,78 @@ class FeedbackManager:
         """Save feedbacks to file."""
         with open(self.feedback_file, 'w') as f:
             json.dump(feedbacks, f, indent=2)
+
+    def export_to_csv(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> str:
+        """
+        Export feedback to CSV format.
+
+        Args:
+            start_date: Filter from this date (ISO format: YYYY-MM-DD)
+            end_date: Filter until this date (ISO format: YYYY-MM-DD)
+
+        Returns:
+            CSV string
+        """
+        feedbacks = self._load_feedbacks()
+
+        # Filter by date if provided
+        if start_date or end_date:
+            filtered = []
+            for f in feedbacks:
+                timestamp = f['timestamp'][:10]  # Get date part
+                if start_date and timestamp < start_date:
+                    continue
+                if end_date and timestamp > end_date:
+                    continue
+                filtered.append(f)
+            feedbacks = filtered
+
+        # Create CSV
+        output = io.StringIO()
+        if feedbacks:
+            fieldnames = ['id', 'timestamp', 'question', 'answer', 'rating', 'comment', 'domain']
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for feedback in feedbacks:
+                writer.writerow({
+                    'id': feedback.get('id', ''),
+                    'timestamp': feedback.get('timestamp', ''),
+                    'question': feedback.get('question', ''),
+                    'answer': feedback.get('answer', ''),
+                    'rating': feedback.get('rating', 0),
+                    'comment': feedback.get('comment', ''),
+                    'domain': feedback.get('domain', '')
+                })
+
+        return output.getvalue()
+
+    def export_to_json(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> str:
+        """
+        Export feedback to JSON format.
+
+        Args:
+            start_date: Filter from this date (ISO format: YYYY-MM-DD)
+            end_date: Filter until this date (ISO format: YYYY-MM-DD)
+
+        Returns:
+            JSON string
+        """
+        feedbacks = self._load_feedbacks()
+
+        # Filter by date if provided
+        if start_date or end_date:
+            filtered = []
+            for f in feedbacks:
+                timestamp = f['timestamp'][:10]  # Get date part
+                if start_date and timestamp < start_date:
+                    continue
+                if end_date and timestamp > end_date:
+                    continue
+                filtered.append(f)
+            feedbacks = filtered
+
+        return json.dumps(feedbacks, indent=2)
 
     def _generate_id(self) -> str:
         """Generate unique feedback ID."""

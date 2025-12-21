@@ -13,12 +13,13 @@ Usage:
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 import json
 import chromadb
 from pathlib import Path
+from datetime import datetime
 import sys
 import time
 import shutil
@@ -498,6 +499,49 @@ async def get_feedback_stats():
             "statistics": stats,
             "recent_feedback": recent
         }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/feedback/export", tags=["Feedback"])
+async def export_feedback(
+    format: str = "csv",
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+):
+    """
+    Export feedback data in CSV or JSON format.
+
+    Args:
+        format: Export format ('csv' or 'json')
+        start_date: Optional start date filter (YYYY-MM-DD)
+        end_date: Optional end date filter (YYYY-MM-DD)
+
+    Returns:
+        Downloadable file with feedback data
+    """
+    try:
+        feedback_mgr = get_feedback_manager()
+
+        if format.lower() == "csv":
+            content = feedback_mgr.export_to_csv(start_date=start_date, end_date=end_date)
+            media_type = "text/csv"
+            filename = f"feedback_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        elif format.lower() == "json":
+            content = feedback_mgr.export_to_json(start_date=start_date, end_date=end_date)
+            media_type = "application/json"
+            filename = f"feedback_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        else:
+            raise HTTPException(status_code=400, detail="Invalid format. Use 'csv' or 'json'")
+
+        return Response(
+            content=content,
+            media_type=media_type,
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
