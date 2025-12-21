@@ -31,6 +31,14 @@ st.set_page_config(
 # API Configuration
 API_BASE_URL = "http://localhost:8000"
 
+# Session State Initialization
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+if 'token' not in st.session_state:
+    st.session_state.token = None
+if 'user' not in st.session_state:
+    st.session_state.user = None
+
 # Enhanced Custom CSS
 st.markdown("""
 <style>
@@ -138,6 +146,74 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+
+# ============================================================================
+# AUTHENTICATION FUNCTIONS
+# ============================================================================
+
+def register_user(username: str, password: str, email: str = "", full_name: str = "") -> tuple[bool, str]:
+    """Register a new user."""
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/auth/register",
+            json={
+                "username": username,
+                "password": password,
+                "email": email if email else None,
+                "full_name": full_name if full_name else None
+            },
+            timeout=10
+        )
+
+        if response.status_code == 200:
+            return True, "Registration successful! Please login."
+        else:
+            error_msg = response.json().get('detail', 'Registration failed')
+            return False, error_msg
+    except Exception as e:
+        return False, f"Error: {str(e)}"
+
+
+def login_user(username: str, password: str) -> tuple[bool, str, Optional[Dict]]:
+    """Login user and get JWT token."""
+    try:
+        response = requests.post(
+            f"{API_BASE_URL}/auth/login",
+            data={
+                "username": username,
+                "password": password
+            },
+            timeout=10
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            st.session_state.authenticated = True
+            st.session_state.token = data['access_token']
+            st.session_state.user = data['user']
+            return True, "Login successful!", data['user']
+        else:
+            error_msg = response.json().get('detail', 'Login failed')
+            return False, error_msg, None
+    except Exception as e:
+        return False, f"Error: {str(e)}", None
+
+
+def logout_user():
+    """Logout user and clear session."""
+    st.session_state.authenticated = False
+    st.session_state.token = None
+    st.session_state.user = None
+    st.rerun()
+
+
+def get_auth_headers() -> Dict[str, str]:
+    """Get headers with authentication token."""
+    headers = {}
+    if st.session_state.token:
+        headers["Authorization"] = f"Bearer {st.session_state.token}"
+    return headers
 
 
 # ============================================================================
@@ -801,6 +877,7 @@ def render_management_tab(domains_data: List[Dict]):
                             f"{API_BASE_URL}/upload",
                             files=files,
                             data=data,
+                            headers=get_auth_headers(),
                             timeout=300
                         )
 
@@ -843,6 +920,7 @@ def render_management_tab(domains_data: List[Dict]):
                             try:
                                 response = requests.delete(
                                     f"{API_BASE_URL}/domain/{domain_to_delete}",
+                                    headers=get_auth_headers(),
                                     timeout=30
                                 )
 
@@ -881,15 +959,97 @@ def render_management_tab(domains_data: List[Dict]):
 
 
 # ============================================================================
+# AUTHENTICATION PAGE
+# ============================================================================
+
+def show_auth_page():
+    """Show login/register page."""
+    st.markdown('<h1 class="main-header">FlexiRAG</h1>', unsafe_allow_html=True)
+    st.markdown("**Dynamic Multi-Domain RAG Framework**")
+    st.divider()
+
+    # Create tabs for Login and Register
+    auth_tab1, auth_tab2 = st.tabs(["🔐 Login", "📝 Register"])
+
+    with auth_tab1:
+        st.subheader("Login to FlexiRAG")
+
+        with st.form("login_form"):
+            username = st.text_input("Username", key="login_username")
+            password = st.text_input("Password", type="password", key="login_password")
+            submit = st.form_submit_button("Login", use_container_width=True)
+
+            if submit:
+                if not username or not password:
+                    st.error("Please enter both username and password")
+                else:
+                    with st.spinner("Logging in..."):
+                        success, message, user = login_user(username, password)
+                        if success:
+                            st.success(message)
+                            st.rerun()
+                        else:
+                            st.error(message)
+
+    with auth_tab2:
+        st.subheader("Create New Account")
+
+        with st.form("register_form"):
+            reg_username = st.text_input("Username", key="reg_username")
+            reg_password = st.text_input("Password (min 6 characters)", type="password", key="reg_password")
+            reg_email = st.text_input("Email (optional)", key="reg_email")
+            reg_fullname = st.text_input("Full Name (optional)", key="reg_fullname")
+            register = st.form_submit_button("Register", use_container_width=True)
+
+            if register:
+                if not reg_username or not reg_password:
+                    st.error("Username and password are required")
+                elif len(reg_password) < 6:
+                    st.error("Password must be at least 6 characters")
+                else:
+                    with st.spinner("Creating account..."):
+                        success, message = register_user(
+                            reg_username,
+                            reg_password,
+                            reg_email,
+                            reg_fullname
+                        )
+                        if success:
+                            st.success(message)
+                            st.info("Please login with your credentials")
+                        else:
+                            st.error(message)
+
+    # Footer
+    st.markdown("""
+    <div class="footer">
+        FlexiRAG - Dynamic Multi-Domain RAG Framework<br>
+        Please login or register to continue
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ============================================================================
 # MAIN APP
 # ============================================================================
 
 def main():
     """Main application entry point."""
 
-    # Header
-    st.markdown('<h1 class="main-header">FlexiRAG</h1>', unsafe_allow_html=True)
-    st.markdown("**Dynamic Multi-Domain RAG Framework** | Zero-code document intelligence for any domain")
+    # Check authentication
+    if not st.session_state.authenticated:
+        show_auth_page()
+        return
+
+    # Header with user info and logout
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.markdown('<h1 class="main-header">FlexiRAG</h1>', unsafe_allow_html=True)
+        st.markdown("**Dynamic Multi-Domain RAG Framework** | Zero-code document intelligence for any domain")
+    with col2:
+        st.write(f"👤 **{st.session_state.user.get('username', 'User')}**")
+        if st.button("Logout", use_container_width=True):
+            logout_user()
 
     # Get system data
     health = get_health_status()
