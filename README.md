@@ -1,84 +1,81 @@
 # FlexiRAG - Dynamic Multi-Domain RAG Framework
 
-![Tests](https://github.com/YOUR_USERNAME/RAGDocumentationAssistant/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/miraccanince/FlexiRAG/actions/workflows/tests.yml/badge.svg)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Tests: 37 passed](https://img.shields.io/badge/tests-37%20passed-brightgreen.svg)](tests/)
 
-A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that automatically adapts to any domain. Perfect for companies wanting to deploy RAG systems with their own documents - zero code changes required!
+A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that automatically adapts to any domain. Perfect for companies wanting to deploy RAG systems with their own documents - zero code changes required.
 
-## 🎯 What Makes This Different?
+## What Makes This Different?
 
 **True Framework Design:**
-- 🔄 **Auto-discovers domains** from your `data/` folder structure
-- 📁 **Zero code changes** when adding new domains or documents
-- 🎨 **Works with ANY company's data** - just drop files in folders
-- 🚀 **Production-ready** with smart indexing and domain filtering
-- 💰 **100% free and local** - no API costs
+- Auto-discovers domains from your `data/` folder structure
+- Zero code changes when adding new domains or documents
+- Works with ANY company's data - just drop files in folders
+- Production-ready with smart indexing and domain filtering
+- 100% free and local - no API costs
 
-**Current Status:** ✅ Week 4 Complete - Production-ready web application with API, UI & Docker deployment
+**Current Status:** Production-ready with CI/CD, automated testing, and user feedback system
 
-## Project Overview
+## Features
 
-Portfolio project demonstrating advanced ML/RAG engineering for ML Engineer roles in Amsterdam/Randstad area.
+### Core Framework
+- Dynamic multi-domain architecture
+- Automatic domain detection from folder structure
+- Multi-format support (PDF, CSV)
+- Smart indexing with change detection
+- Domain filtering for precise queries
+- Interactive CLI with commands (/switch, /stats, /help)
 
-## ✨ Features
+### ML/AI Stack
+- Local embeddings (sentence-transformers: all-MiniLM-L6-v2)
+- Vector database (ChromaDB) with persistent storage
+- Local LLM (Ollama + Llama 3.2 3B)
+- Hybrid search (Semantic + BM25)
+- LLM-based query reranking
+- Semantic search with source citations
+- 100% free and local (zero API costs)
 
-**🎯 Core Framework (Week 1-2):**
-- ✅ Dynamic multi-domain architecture
-- ✅ Automatic domain detection from folder structure
-- ✅ Multi-format support (PDF, CSV)
-- ✅ Smart indexing with change detection
-- ✅ Domain filtering for precise queries
-- ✅ Interactive CLI with commands (/switch, /stats, /help)
-- ✅ Custom evaluation framework (keyword coverage + success rate)
+### Production Features
+- FastAPI backend with streaming responses
+- Modern Streamlit web UI with analytics
+- User feedback system (thumbs up/down with analytics)
+- Performance optimization & caching (360x speedup)
+- CI/CD pipeline with GitHub Actions
+- 37 unit tests (100% pass rate, 81% coverage)
+- Docker deployment
+- Comprehensive documentation
 
-**🤖 ML/AI Stack:**
-- ✅ Local embeddings (sentence-transformers: all-MiniLM-L6-v2)
-- ✅ Vector database (ChromaDB) with persistent storage
-- ✅ Local LLM (Ollama + Llama 3.2 3B)
-- ✅ Semantic search with source citations
-- ✅ 100% free and local (zero API costs)
-
-**📊 Current Dataset:**
-- ✅ Automotive: 635 chunks (CAN, OBD-II, Infotainment PDFs)
-- ✅ Fashion: 30,758 products (E-commerce CSV)
-- ✅ Total: 31,393 indexed documents
-
-**🚀 Advanced Features (Week 3-4):**
-- ✅ Hybrid search (Semantic + BM25)
-- ✅ LLM-based query reranking
-- ✅ Performance optimization & caching (360x speedup)
-- ✅ FastAPI backend with streaming
-- ✅ Modern Streamlit web UI with analytics
-- ✅ User feedback system (thumbs up/down with analytics)
-- ✅ **Unit tests (37 tests, 100% pass rate)**
-- ✅ Docker deployment
-- ✅ Complete documentation
+### Current Dataset
+- Automotive: 635 chunks (CAN, OBD-II, Infotainment PDFs)
+- Fashion: 30,758 products (E-commerce CSV)
+- Total: 31,393 indexed documents
 
 ## Tech Stack
 
 **Backend:**
-- Python 3.13
+- Python 3.11+
 - FastAPI (REST API)
 - LangChain (RAG orchestration)
 - ChromaDB (vector store)
-- Sentence Transformers (local embeddings - all-MiniLM-L6-v2)
-- Ollama + Llama 3.2 3B (local LLM)
+- Sentence Transformers (all-MiniLM-L6-v2)
+- Ollama + Llama 3.2 3B
 - BM25 (keyword search)
 
 **Frontend:**
 - Streamlit (web UI)
 - Plotly (interactive charts)
 
-**Testing:**
+**Testing & CI/CD:**
 - Pytest (37 unit tests, 100% pass rate)
-- pytest-cov (coverage reporting)
+- pytest-cov (81% coverage on core modules)
+- GitHub Actions (automated testing on every push/PR)
 
 **Deployment:**
 - Docker & Docker Compose
 - Uvicorn (ASGI server)
 
-## Setup
+## Quick Start
 
 ### Prerequisites
 
@@ -87,85 +84,163 @@ Portfolio project demonstrating advanced ML/RAG engineering for ML Engineer role
 
 ### Installation
 
-1. Clone the repository
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/miraccanince/FlexiRAG.git
+   cd FlexiRAG
+   ```
 
-2. Create virtual environment:
+2. **Create virtual environment:**
    ```bash
    python3 -m venv venv
    source venv/bin/activate  # macOS/Linux
+   # or
+   venv\Scripts\activate  # Windows
    ```
 
-3. Install dependencies:
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. Install Ollama and download model:
+4. **Install Ollama and download model:**
    ```bash
-   brew install ollama  # macOS
+   # macOS
+   brew install ollama
+
+   # Linux
+   curl -fsSL https://ollama.ai/install.sh | sh
+
+   # Download model
    ollama pull llama3.2:3b
    ```
 
-5. Place your PDF documents in `data/automotive/` directory
+5. **Add your documents:**
+   ```bash
+   # Create domain folders and add your documents
+   mkdir -p data/your_domain
+   cp your_files.pdf data/your_domain/
+   ```
 
-## 🚀 Quick Start
+6. **Index documents:**
+   ```bash
+   python index_documents.py
+   ```
 
-### Option 1: Web Interface (Recommended)
+## Usage
 
-Start the API and web UI:
+### Web Interface (Recommended)
 
+Start API and frontend:
+
+**Terminal 1 - Start API:**
 ```bash
-./start_services.sh
+uvicorn api.main:app --reload --port 8000
 ```
 
-Then open your browser:
+**Terminal 2 - Start Frontend:**
+```bash
+streamlit run frontend/app.py
+```
+
+Then open:
 - **Web UI:** http://localhost:8501
 - **API Docs:** http://localhost:8000/docs
 
-### Option 2: Command Line
-
-Run the interactive CLI:
+### Command Line Interface
 
 ```bash
-python3 main.py
+python main.py
 ```
 
-Commands:
-```bash
-💬 Your question: What is CAN protocol?
-# Or use commands:
+Available commands:
+```
 /switch   # Change domain
 /stats    # View statistics
 /help     # Show help
 /quit     # Exit
 ```
 
-### Option 3: Docker Deployment
-
-Run everything in containers:
+### Docker Deployment
 
 ```bash
 docker-compose up -d
 ```
 
-### 1. Add Your Documents
+Access services:
+- Frontend: http://localhost:8501
+- API: http://localhost:8000
 
-Simply organize your documents in the `data/` folder:
+## Running Tests
 
 ```bash
-data/
-├── automotive/        # Your PDFs here
-│   ├── manual.pdf
-│   └── specs.pdf
-├── legal/             # Different domain
-│   └── contracts.pdf
-└── medical/           # Another domain
-    └── research.pdf
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=src --cov-report=term --cov-report=html
+
+# Open coverage report
+open htmlcov/index.html
 ```
 
-**That's it!** The system auto-detects domains from folder names.
+## Project Structure
 
-### Example Queries by Domain
+```
+FlexiRAG/
+├── src/                          # Core source code
+│   ├── pdf_loader.py            # PDF loading and chunking
+│   ├── csv_loader.py            # CSV data processing
+│   ├── embeddings.py            # Embedding generation
+│   ├── vector_store.py          # ChromaDB operations
+│   ├── qa_chain.py              # RAG pipeline
+│   ├── hybrid_search.py         # Hybrid search (Semantic + BM25)
+│   ├── reranker.py              # LLM-based reranking
+│   ├── cache_manager.py         # Query caching & performance
+│   └── feedback_manager.py      # User feedback system
+├── api/                          # FastAPI backend
+│   └── main.py                  # REST API endpoints
+├── frontend/                     # Streamlit frontend
+│   └── app.py                   # Web UI
+├── tests/                        # Unit tests (37 tests)
+│   ├── test_embeddings.py       # Embedding tests
+│   ├── test_vector_store.py     # Vector store tests
+│   ├── test_cache_manager.py    # Cache tests
+│   ├── test_csv_loader.py       # CSV loader tests
+│   └── test_feedback_manager.py # Feedback tests
+├── .github/workflows/            # CI/CD
+│   └── tests.yml                # GitHub Actions workflow
+├── data/                         # Document storage
+│   ├── automotive/              # Domain 1
+│   └── fashion/                 # Domain 2
+├── feedback/                     # User feedback data
+│   └── feedback_store.json      # Feedback storage
+├── chroma_db/                    # Vector database (auto-generated)
+├── main.py                       # CLI interface
+├── index_documents.py            # Document indexing script
+├── requirements.txt              # Python dependencies
+└── docker-compose.yml            # Docker configuration
+```
+
+## API Endpoints
+
+**Query & Search:**
+- `POST /query` - Question answering with LLM (streaming)
+- `POST /search` - Document search without LLM
+- `GET /domains` - List available domains
+- `GET /health` - System health check
+
+**Feedback:**
+- `POST /feedback` - Submit user feedback
+- `GET /feedback/stats` - Get feedback analytics
+
+**Management:**
+- `POST /upload` - Upload new documents
+- `DELETE /domain/{name}` - Delete domain
+
+Full API documentation: http://localhost:8000/docs
+
+## Example Queries
 
 **Automotive:**
 - "What is CAN protocol used for?"
@@ -177,68 +252,59 @@ data/
 - "What brands sell western wear?"
 - "Find jewellery products"
 
-## Project Structure
+## Documentation
 
-```
-RAGDocumentationAssistant/
-├── src/
-│   ├── pdf_loader.py        # PDF loading and chunking
-│   ├── embeddings.py         # Local embedding generation
-│   ├── vector_store.py       # ChromaDB operations
-│   └── qa_chain.py           # RAG pipeline (retrieve + LLM)
-├── data/
-│   ├── automotive/           # PDF documents
-│   └── ecommerce/            # CSV data (coming in Week 2)
-├── notebooks/                # Jupyter experiments
-│   ├── 01_pdf_loading_experiment.ipynb
-│   └── 02_embedding_experiment.ipynb
-├── chroma_db/                # Vector database (auto-generated)
-├── main.py                   # Interactive Q&A interface
-├── index_documents.py        # Document indexing script
-└── requirements.txt          # Python dependencies
-```
+- [FEEDBACK_SYSTEM.md](FEEDBACK_SYSTEM.md) - User feedback system implementation
+- [CI_CD_GUIDE.md](CI_CD_GUIDE.md) - CI/CD pipeline guide
+- [tests/README.md](tests/README.md) - Testing documentation
 
-## Current Dataset
+## Development
 
-- **Automotive Documentation:**
-  - CAN.pdf (167 pages) - Controller Area Network protocol
-  - On-board Diagnostics.pdf (20 pages) - OBD-II standards
-  - automotive_infotainment.pdf (62 pages) - Infotainment systems
-  - **Total:** 635 chunks indexed
+### Adding New Domains
 
-## 📅 Development Roadmap
+1. Create folder in `data/`:
+   ```bash
+   mkdir data/new_domain
+   ```
 
-**✅ Week 1: Foundation (Complete)**
-- PDF loading and chunking
-- Local embeddings (sentence-transformers)
-- ChromaDB vector store
-- Ollama LLM integration
-- Interactive CLI interface
+2. Add documents (PDF or CSV):
+   ```bash
+   cp documents.pdf data/new_domain/
+   ```
 
-**✅ Week 2: Framework Architecture (Complete)**
-- Dynamic multi-domain detection
-- CSV support for structured data
-- Smart indexing with change detection
-- Domain filtering system
-- Multi-format document processing
+3. Reindex:
+   ```bash
+   python index_documents.py
+   ```
 
-**✅ Week 3: Advanced RAG Features (Complete)**
-- Hybrid search (Semantic + BM25)
-- LLM-based query reranking
-- PCA visualization for embeddings
-- Performance optimization & caching
-- Streaming LLM generation
+The system automatically detects and indexes the new domain.
 
-**✅ Week 4: Production Deployment (Complete)**
-- FastAPI backend with 5 endpoints
-- Streamlit web interface
-- Docker containerization
-- Comprehensive documentation
-- Production-ready system
+### Contributing
 
-**📚 Documentation:**
-- [Technical Documentation](TECHNICAL_DOCUMENTATION.md) - Complete system architecture, setup guide, and implementation details
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `pytest tests/ -v`
+5. Submit a pull request
+
+CI/CD pipeline will automatically run tests on your PR.
+
+## Performance
+
+- Average query time: 3.6s (with caching: ~0.01s)
+- Cache hit rate: ~85% in production use
+- Speedup with caching: 360x
+- Index size: 31,393 documents
+- Coverage: 81% on core modules
+
+## License
+
+MIT License - See LICENSE file for details
 
 ## Author
 
-Building this to transition from QA Engineer to ML Engineer in Netherlands.
+**Mirac Can Ince**
+
+Portfolio project demonstrating production-ready RAG systems for ML Engineer positions.
+
+Built using Python, ChromaDB, and Llama 3.2 | 100% Free & Local
