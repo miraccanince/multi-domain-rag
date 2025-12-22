@@ -8,8 +8,6 @@ A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that
 
 **GitHub:** https://github.com/miraccanince/FlexiRAG
 
----
-
 ## Project Summary
 
 **What is this?** A complete production-ready RAG (Retrieval-Augmented Generation) system with ML-powered semantic caching, JWT authentication, and modern web UI.
