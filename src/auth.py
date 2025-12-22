@@ -92,8 +92,13 @@ class UserManager:
             if username in self.users:
                 raise ValueError(f"Username '{username}' already exists")
 
+            # Truncate password to 72 bytes (bcrypt limitation)
+            # This is a security best practice for bcrypt
+            password_bytes = password.encode('utf-8')[:72]
+            password_truncated = password_bytes.decode('utf-8', errors='ignore')
+
             # Hash password
-            hashed_password = pwd_context.hash(password)
+            hashed_password = pwd_context.hash(password_truncated)
 
             # Create user entry
             user_data = {
@@ -128,7 +133,11 @@ class UserManager:
         if not user:
             return None
 
-        if not pwd_context.verify(password, user['hashed_password']):
+        # Truncate password to 72 bytes (bcrypt limitation)
+        password_bytes = password.encode('utf-8')[:72]
+        password_truncated = password_bytes.decode('utf-8', errors='ignore')
+
+        if not pwd_context.verify(password_truncated, user['hashed_password']):
             return None
 
         if not user.get('is_active', True):
