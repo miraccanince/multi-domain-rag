@@ -10,7 +10,7 @@ A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that
 
 ---
 
-## 👋 For Recruiters & Hiring Managers
+## Project Summary
 
 **What is this?** A complete production-ready RAG (Retrieval-Augmented Generation) system with ML-powered semantic caching, JWT authentication, and modern web UI.
 
