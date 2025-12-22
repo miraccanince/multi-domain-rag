@@ -25,6 +25,7 @@ python-multipart>=0.0.6  # For form data parsing
 slowapi>=0.1.9  # Rate limiting for API endpoints
 python-jose[cryptography]>=3.3.0  # JWT token handling
 passlib[bcrypt]>=1.7.4  # Password hashing
+bcrypt>=4.0.0,<5.0.0  # Pin to 4.x - avoid breaking changes in 5.x
 streamlit>=1.29.0  # Web UI frontend
 streamlit-cookies-manager>=0.2.0  # Cookie management for session persistence
 plotly>=5.18.0  # Interactive charts for analytics dashboard
