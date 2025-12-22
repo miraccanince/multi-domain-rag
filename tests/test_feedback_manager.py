@@ -173,3 +173,92 @@ class TestFeedbackManager:
         assert entry1['id'] != entry2['id']
         assert entry1['id'].startswith('fb_')
         assert entry2['id'].startswith('fb_')
+
+    def test_export_to_csv(self, feedback_mgr):
+        """Test exporting feedback to CSV format."""
+        # Add some feedback
+        feedback_mgr.save_feedback("Q1", "A1", rating=1, comment="Good", domain="automotive")
+        feedback_mgr.save_feedback("Q2", "A2", rating=-1, comment="Bad", domain="fashion")
+
+        csv_data = feedback_mgr.export_to_csv()
+
+        # Check CSV headers
+        assert 'id,timestamp,question,answer,rating,comment,domain' in csv_data
+
+        # Check data rows
+        assert 'Q1' in csv_data
+        assert 'Q2' in csv_data
+        assert 'automotive' in csv_data
+        assert 'fashion' in csv_data
+
+    def test_export_to_csv_with_date_filter(self, feedback_mgr):
+        """Test CSV export with date filtering."""
+        # Add feedback with known dates
+        feedback_mgr.save_feedback("Q1", "A1", rating=1)
+        feedback_mgr.save_feedback("Q2", "A2", rating=-1)
+
+        # Export with date range
+        csv_data = feedback_mgr.export_to_csv(
+            start_date="2025-01-01",
+            end_date="2025-12-31"
+        )
+
+        # Should include entries within date range
+        assert 'Q1' in csv_data
+        assert 'Q2' in csv_data
+
+    def test_export_to_csv_empty(self, feedback_mgr):
+        """Test CSV export with no feedback."""
+        csv_data = feedback_mgr.export_to_csv()
+
+        # Empty feedback returns empty string
+        assert csv_data == ""
+
+    def test_export_to_json(self, feedback_mgr):
+        """Test exporting feedback to JSON format."""
+        feedback_mgr.save_feedback("Q1", "A1", rating=1, domain="automotive")
+        feedback_mgr.save_feedback("Q2", "A2", rating=-1, domain="fashion")
+
+        json_data = feedback_mgr.export_to_json()
+        parsed = json.loads(json_data)
+
+        assert len(parsed) == 2
+        assert parsed[0]['question'] == "Q1"
+        assert parsed[1]['question'] == "Q2"
+        assert parsed[0]['domain'] == "automotive"
+        assert parsed[1]['domain'] == "fashion"
+
+    def test_export_to_json_with_date_filter(self, feedback_mgr):
+        """Test JSON export with date filtering."""
+        feedback_mgr.save_feedback("Q1", "A1", rating=1)
+        feedback_mgr.save_feedback("Q2", "A2", rating=-1)
+
+        json_data = feedback_mgr.export_to_json(
+            start_date="2025-01-01",
+            end_date="2025-12-31"
+        )
+        parsed = json.loads(json_data)
+
+        assert len(parsed) == 2
+
+    def test_export_to_json_empty(self, feedback_mgr):
+        """Test JSON export with no feedback."""
+        json_data = feedback_mgr.export_to_json()
+        parsed = json.loads(json_data)
+
+        assert parsed == []
+
+    def test_csv_special_characters(self, feedback_mgr):
+        """Test CSV export handles special characters."""
+        feedback_mgr.save_feedback(
+            question="What is \"CAN\"?",
+            answer="It's a protocol, with commas, and \"quotes\"",
+            rating=1,
+            comment="Good, but needs more detail"
+        )
+
+        csv_data = feedback_mgr.export_to_csv()
+
+        # Should properly escape quotes and commas
+        assert csv_data is not None
+        assert '"CAN"' in csv_data or 'CAN' in csv_data

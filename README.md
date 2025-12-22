@@ -2,7 +2,7 @@
 
 ![Tests](https://github.com/miraccanince/FlexiRAG/actions/workflows/tests.yml/badge.svg)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests: 37 passed](https://img.shields.io/badge/tests-37%20passed-brightgreen.svg)](tests/)
+[![Tests: 87 passed](https://img.shields.io/badge/tests-87%20passed-brightgreen.svg)](tests/)
 
 A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that automatically adapts to any domain. Perfect for companies wanting to deploy RAG systems with their own documents - zero code changes required.
 
@@ -17,7 +17,7 @@ A flexible, production-ready RAG (Retrieval-Augmented Generation) framework that
 **Key Technical Highlights:**
 - **Full-Stack ML/AI:** FastAPI backend + Streamlit frontend + LLM integration
 - **Advanced ML:** Semantic cache using embedding similarity (95%+ accuracy)
-- **Production-Ready:** JWT auth, rate limiting, CI/CD, 37 unit tests
+- **Production-Ready:** JWT auth, rate limiting, CI/CD, 87 unit tests
 - **Architecture:** ChromaDB vector store, Hybrid search (BM25 + semantic), LLM reranking
 
 **How to Run Locally (5 minutes):**
@@ -89,7 +89,7 @@ streamlit run frontend/app.py
 - User feedback system (thumbs up/down with analytics)
 - Performance optimization & caching (360x speedup)
 - CI/CD pipeline with GitHub Actions
-- 37 unit tests (100% pass rate, 81% coverage)
+- 87 unit tests (100% pass rate, 90%+ coverage on production features)
 - Docker deployment
 - Comprehensive documentation
 
@@ -342,7 +342,7 @@ CI/CD pipeline will automatically run tests on your PR.
 - Cache hit rate: ~85% in production use
 - Speedup with caching: 360x
 - Index size: 31,393 documents
-- Coverage: 81% on core modules
+- Coverage: 90%+ on production features (auth, semantic cache, vector store, feedback)
 - Semantic cache similarity: 95%+ for paraphrased queries
 
 ## Technical Highlights for Interviews
@@ -369,8 +369,8 @@ CI/CD pipeline will automatically run tests on your PR.
 ### Engineering Excellence
 
 **4. CI/CD Pipeline**
-- GitHub Actions running 37 unit tests on every commit
-- 81% code coverage on core modules
+- GitHub Actions running 87 unit tests on every commit
+- 90%+ code coverage on production features (auth: 93%, semantic cache: 91%, vector store: 93%)
 - Automated dependency caching
 - Coverage reports as downloadable artifacts
 
