@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- ===== LAYER 1: TRIGGER ===== -->
+    <mxCell id="L1_label" value="LAYER 1 — TRIGGER SOURCES" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=10;fontStyle=1;fontColor=#3a7bd5;" vertex="1" parent="1">
+      <mxGeometry x="40" y="20" width="300" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="t1" value="Webinar&#xa;(Zoom / GoToWebinar)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#3a7bd5;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="50" width="160" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="t2" value="Content Download&#xa;(HubSpot / Website Form)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#3a7bd5;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="220" y="50" width="160" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="t3" value="Demo Request&#xa;(Calendly / Website Form)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#3a7bd5;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="400" y="50" width="160" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="t4" value="LinkedIn&#xa;(Lead Gen Forms)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#3a7bd5;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="580" y="50" width="160" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="channel_note" value="channel label assigned" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=center;fontSize=9;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="300" y="110" width="180" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t1" target="L2_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t2" target="L2_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t3" target="L2_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t4" target="L2_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ===== LAYER 2: CONSOLIDATION ===== -->
+    <mxCell id="L2_label" value="LAYER 2 — CONSOLIDATION" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=10;fontStyle=1;fontColor=#666699;" vertex="1" parent="1">
+      <mxGeometry x="40" y="145" width="300" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="L2_box" value="&lt;b&gt;1. Standardize to Unified Lead Profile&lt;/b&gt;&#xa;name · email · company · position · source_channel · timestamp&#xa;&#xa;&lt;b&gt;2. Duplicate Check&lt;/b&gt;&#xa;email match → merge records, combine channel signals&#xa;&#xa;&lt;b&gt;3. Data Enrichment&lt;/b&gt;&#xa;Clearbit / Apollo → company size, industry, revenue estimate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="170" width="700" height="100" as="geometry" />
+    </mxCell>
+
+    <!-- GDPR Check -->
+    <mxCell id="L2_gdpr" value="PRIVACY &amp; COMPLIANCE CHECK&#xa;GDPR / data processing consent verified?&#xa;No consent → lead excluded from workflow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="282" width="340" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="e_l2_gdpr" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#b85450;" edge="1" source="L2_box" target="L2_gdpr" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- Human -->
+    <mxCell id="L2_human" value="HUMAN-IN-THE-LOOP&#xa;enrichment fails → manual data entry by ops team" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="195" width="260" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="e_l2_human" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="L2_box" target="L2_human" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <mxCell id="e_l2_split" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L2_box" target="L3A_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e_l2_split2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L2_box" target="L3B_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ===== LAYER 3A: AI SCORING ===== -->
+    <mxCell id="L3_label" value="LAYER 3 — AI PROCESSING (parallel)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=10;fontStyle=1;fontColor=#9933cc;" vertex="1" parent="1">
+      <mxGeometry x="40" y="355" width="400" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="L3A_box" value="AI SCORING (Claude)&#xa;&#xa;Input:&#xa;- Channel label + engagement depth&#xa;- Position / seniority&#xa;- Company size + industry&#xa;- Past interactions&#xa;&#xa;Output:&#xa;- Score (0–100)&#xa;- Tier: Hot / Warm / Cold&#xa;- Reasoning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9933cc;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="380" width="300" height="160" as="geometry" />
+    </mxCell>
+    <mxCell id="L3A_qc" value="QC CHECK&#xa;Format valid? Logic consistent?&#xa;Fail → retry x1&#xa;Still fail → Default Warm + Human flag" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="555" width="300" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="e_3a_qc" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L3A_box" target="L3A_qc" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ===== LAYER 3B: AI RESEARCH ===== -->
+    <mxCell id="L3B_box" value="AI RESEARCH (Claude + web search)&#xa;&#xa;Input:&#xa;- Company name / industry / size&#xa;- Prospect position&#xa;- Source content (webinar topic / PDF)&#xa;&#xa;Output:&#xa;- Pain points&#xa;- Recent news + growth signals&#xa;- Competitor analysis&#xa;- Role-based priorities" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9933cc;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+      <mxGeometry x="400" y="380" width="340" height="160" as="geometry" />
+    </mxCell>
+    <mxCell id="L3B_qc" value="QC CHECK&#xa;All fields populated? Company found?&#xa;Fail → retry x1&#xa;Still fail → Human flag" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="400" y="555" width="340" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="e_3b_qc" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L3B_box" target="L3B_qc" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- Cold Nurture -->
+    <mxCell id="nurture" value="Cold tier&#xa;→ Nurture Sequence starts (parallel)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#3a7bd5;fontSize=10;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="780" y="578" width="220" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="e_nurture" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="L3A_qc" target="nurture" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <mxCell id="e_3a_l4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L3A_qc" target="L4_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e_3b_l4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L3B_qc" target="L4_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <mxCell id="merge_label" value="3A + 3B outputs merge" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=center;fontSize=9;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="200" y="648" width="200" height="20" as="geometry" />
+    </mxCell>
+
+    <!-- ===== LAYER 4: AI OUTREACH ===== -->
+    <mxCell id="L4_label" value="LAYER 4 — AI OUTREACH" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=10;fontStyle=1;fontColor=#9933cc;" vertex="1" parent="1">
+      <mxGeometry x="40" y="673" width="300" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="L4_box" value="AI OUTREACH (Claude)&#xa;&#xa;Input: Score + Tier + Research + Position + Source content&#xa;&#xa;Hot  → Confident, respectful urgency&#xa;         &quot;Would a 20-min call this week work for you?&quot;&#xa;Warm → Value-driven&#xa;         &quot;Happy to share what worked for others in your space.&quot;&#xa;Cold  → Soft, no pressure&#xa;         &quot;Just wanted to share this in case it&apos;s relevant.&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9933cc;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="698" width="700" height="120" as="geometry" />
+    </mxCell>
+
+    <!-- A/B Test -->
+    <mxCell id="L4_ab" value="A/B TEST&#xa;2 versions per tier generated&#xa;Response rates tracked&#xa;Winning version → fed back into prompt&#xa;Results → Feedback Loop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="638" width="220" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="e_l4_ab" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="L4_box" target="L4_ab" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <mxCell id="L4_human" value="HUMAN-IN-THE-LOOP (Hot only)&#xa;Sales rep → Approve / Edit / Reject → send&#xa;Warm + Cold → sent automatically" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="733" width="260" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="e_l4_human" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="L4_box" target="L4_human" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <mxCell id="L4_qc" value="QC CHECK&#xa;Name + company correct? Tone matches tier?&#xa;Fail → retry x1 → still fail → human flag" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="190" y="833" width="320" height="70" as="geometry" />
+    </mxCell>
+    <mxCell id="e_l4_qc" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L4_box" target="L4_qc" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e_l4_l5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L4_qc" target="L5_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ===== LAYER 5: ROUTING ===== -->
+    <mxCell id="L5_label" value="LAYER 5 — ROUTING" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=10;fontStyle=1;fontColor=#666699;" vertex="1" parent="1">
+      <mxGeometry x="40" y="918" width="300" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="L5_box" value="&lt;b&gt;PRE-ROUTING VALIDATION&lt;/b&gt;&#xa;Check 1 → Minimum Data: country, company, email, segment → fail: back to enrichment&#xa;Check 2 → Basic Qualification: ICP fit? spam? duplicate? → fail: disqualified&#xa;Check 3 → Tier Determination: size/revenue/region confirmed? → unclear: SDR queue&#xa;&#xa;&lt;b&gt;ROUTING LOGIC&lt;/b&gt;&#xa;Geography → Tier → Industry (Enterprise) → Workload → Assign to Sales Rep&#xa;&#xa;&lt;b&gt;POST-ROUTING QC&lt;/b&gt;&#xa;Hot → Senior rep? Geography correct? Workload ok? → fail: Sales Manager flag" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="943" width="700" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="L5_human" value="HUMAN-IN-THE-LOOP&#xa;No match found →&#xa;Sales Manager manual assign" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="978" width="260" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="e_l5_human" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="L5_box" target="L5_human" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e_l5_l6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L5_box" target="L6_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ===== LAYER 6: FOLLOW-UP ===== -->
+    <mxCell id="L6_label" value="LAYER 6 — FOLLOW-UP" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=10;fontStyle=1;fontColor=#666699;" vertex="1" parent="1">
+      <mxGeometry x="40" y="1088" width="300" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="L6_box" value="&lt;b&gt;No response → automated sequence by tier:&lt;/b&gt;&#xa;&#xa;Hot  → Day 2 / Day 5 / Day 9 / Day 15 (break-up email) — max 4–5 touches&#xa;Warm → Day 5 / Day 14 / Day 25–30 — max 3–4 touches (content-driven)&#xa;Cold  → Day 14 / Day 30 — max 2–3 touches → nurture sequence&#xa;&#xa;&lt;b&gt;Response received:&lt;/b&gt;&#xa;→ Meeting requested → auto calendar link (Calendly)&#xa;→ Question asked → sales rep notification, manual reply&#xa;→ Not interested → downgrade tier, nurture sequence&#xa;&#xa;&lt;b&gt;After 4–6 touches, no response:&lt;/b&gt;&#xa;Status: Unresponsive → 60–90 days → re-engagement trigger" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="1113" width="700" height="160" as="geometry" />
+    </mxCell>
+    <mxCell id="L6_qc" value="QC CHECK&#xa;Follow-up cap reached? Tier downgrade needed?&#xa;Fail → human flag" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="760" y="1153" width="260" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="e_l6_qc" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="L6_box" target="L6_qc" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+    <!-- ===== FEEDBACK LOOP ===== -->
+    <mxCell id="feedback_label" value="FEEDBACK LOOP — self-improving system" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontStyle=1;fontColor=#cc0000;" vertex="1" parent="1">
+      <mxGeometry x="1040" y="660" width="220" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="feedback_box" value="FEEDBACK LOOP&#xa;&#xa;Meeting booked → positive signal&#xa;Not interested → negative signal&#xa;Unresponsive → weak signal&#xa;A/B winner → prompt updated&#xa;&#xa;→ Scoring model improves over time" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+      <mxGeometry x="1040" y="685" width="220" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="e_l6_feedback" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#d79b00;" edge="1" source="L6_box" target="feedback_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e_ab_feedback" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#82b366;" edge="1" source="L4_ab" target="feedback_box" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+    <mxCell id="e_feedback_l3a" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#cc0000;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" source="feedback_box" target="L3A_box" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1020" y="750" />
+          <mxPoint x="1020" y="460" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ===== LEGEND ===== -->
+    <mxCell id="legend_title" value="LEGEND" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="1298" width="100" height="20" as="geometry" />
+    </mxCell>
+    <mxCell id="leg1" value="Trigger source" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#3a7bd5;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="1323" width="130" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg2" value="Traditional automation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="190" y="1323" width="140" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg3" value="AI-powered step" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9933cc;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="350" y="1323" width="130" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg4" value="HUMAN-IN-THE-LOOP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="1323" width="150" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg5" value="QC / Validation check" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="670" y="1313" width="140" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="leg6" value="A/B Test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="830" y="1323" width="120" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg7" value="Feedback Loop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="970" y="1323" width="130" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg8" value="Privacy &amp; Compliance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="1120" y="1323" width="150" height="30" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>

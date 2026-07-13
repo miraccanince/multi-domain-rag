@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Lead Management Workflow — Cleeng</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+        .dot-blue { background: #3b82f6; }
+        .dot-purple { background: #8b5cf6; }
+        .dot-yellow { background: #eab308; }
+        .dot-green { background: #22c55e; }
+
+        .workflow {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Vertical connector line */
+        .connector {
+            width: 3px;
+            height: 32px;
+            background: #333;
+            margin: 0 auto;
+            position: relative;
+        }
+        .connector::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 8px solid #333;
+        }
+
+        /* Node base */
+        .node {
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin: 0 auto;
+            max-width: 900px;
+            position: relative;
+        }
+        .node-header {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+        .node-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .node-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .node-card {
+            background: rgba(0,0,0,0.25);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+        .node-card h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .node-card ul {
+            list-style: none;
+            font-size: 12px;
+            color: #aaa;
+            line-height: 1.7;
+        }
+        .node-card li::before {
+            content: '→ ';
+            color: #666;
+        }
+
+        /* Color themes */
+        .node-trigger {
+            background: linear-gradient(135deg, #1e3a5f, #1a2744);
+            border: 1px solid #2563eb55;
+        }
+        .node-trigger .node-header { color: #60a5fa; }
+        .node-trigger .node-title { color: #93c5fd; }
+        .node-trigger .node-card h4 { color: #60a5fa; }
+
+        .node-blue {
+            background: linear-gradient(135deg, #172554, #1e2a4a);
+            border: 1px solid #3b82f655;
+        }
+        .node-blue .node-header { color: #60a5fa; }
+        .node-blue .node-title { color: #93c5fd; }
+        .node-blue .node-card h4 { color: #60a5fa; }
+
+        .node-purple {
+            background: linear-gradient(135deg, #2e1065, #1f1145);
+            border: 1px solid #8b5cf655;
+        }
+        .node-purple .node-header { color: #a78bfa; }
+        .node-purple .node-title { color: #c4b5fd; }
+        .node-purple .node-card h4 { color: #a78bfa; }
+
+        .node-yellow {
+            background: linear-gradient(135deg, #422006, #352a10);
+            border: 1px solid #eab30855;
+        }
+        .node-yellow .node-header { color: #facc15; }
+        .node-yellow .node-title { color: #fde68a; }
+        .node-yellow .node-card h4 { color: #facc15; }
+
+        .node-green {
+            background: linear-gradient(135deg, #052e16, #0a2618);
+            border: 1px solid #22c55e55;
+        }
+        .node-green .node-header { color: #4ade80; }
+        .node-green .node-title { color: #86efac; }
+        .node-green .node-card h4 { color: #4ade80; }
+
+        /* Decision diamond */
+        .decision-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 0 auto;
+            padding: 8px 0;
+        }
+        .decision {
+            background: linear-gradient(135deg, #3b1a6e, #2e1065);
+            border: 2px solid #8b5cf6;
+            border-radius: 16px;
+            padding: 20px 36px;
+            text-align: center;
+            position: relative;
+        }
+        .decision-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #a78bfa;
+            margin-bottom: 6px;
+        }
+        .decision-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e9d5ff;
+        }
+
+        /* Branch layout */
+        .branch-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .branch-label {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin: 0 auto 8px;
+            display: inline-block;
+        }
+        .branch-yes {
+            background: #22c55e22;
+            color: #4ade80;
+            border: 1px solid #22c55e44;
+        }
+        .branch-no {
+            background: #ef444422;
+            color: #f87171;
+            border: 1px solid #ef444444;
+        }
+        .branch-col {
+            text-align: center;
+        }
+        .branch-col .node {
+            text-align: left;
+        }
+        .branch-connector {
+            width: 3px;
+            height: 20px;
+            background: #333;
+            margin: 0 auto;
+        }
+
+        /* Source tags */
+        .source-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .source-tag {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid #3b82f644;
+            border-radius: 10px;
+            padding: 12px 20px;
+            text-align: center;
+            min-width: 140px;
+        }
+        .source-tag .icon { font-size: 24px; margin-bottom: 4px; }
+        .source-tag .label { font-size: 13px; font-weight: 600; color: #93c5fd; }
+
+        /* Re-score loop */
+        .rescore-loop {
+            text-align: center;
+            margin-top: 12px;
+        }
+        .rescore-badge {
+            display: inline-block;
+            background: #8b5cf622;
+            border: 1px dashed #8b5cf666;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 12px;
+            color: #a78bfa;
+        }
+
+        .section-spacer { height: 8px; }
+    </style>
+</head>
+<body>
+
+<h1>AI-Powered Lead Management & Qualification Workflow</h1>
+<p class="subtitle">Cleeng — B2B SaaS Demand Generation | Technical Architecture</p>
+
+<div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-blue"></div> Traditional Automation</div>
+    <div class="legend-item"><div class="legend-dot dot-purple"></div> AI Components</div>
+    <div class="legend-item"><div class="legend-dot dot-yellow"></div> Human-in-the-Loop</div>
+    <div class="legend-item"><div class="legend-dot dot-green"></div> Actions</div>
+</div>
+
+<div class="workflow">
+
+    <!-- TRIGGER -->
+    <div class="node node-trigger">
+        <div class="node-header">Trigger</div>
+        <div class="node-title">New Lead Entry — Multi-Source Ingestion</div>
+        <div class="source-tags">
+            <div class="source-tag"><div class="icon">📹</div><div class="label">Webinar<br>Registration</div></div>
+            <div class="source-tag"><div class="icon">💼</div><div class="label">LinkedIn<br>Ads</div></div>
+            <div class="source-tag"><div class="icon">🎯</div><div class="label">Demo<br>Request</div></div>
+            <div class="source-tag"><div class="icon">📄</div><div class="label">Content<br>Download</div></div>
+        </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- STEP 1 -->
+    <div class="node node-blue">
+        <div class="node-header">Step 1 — Traditional Automation</div>
+        <div class="node-title">Data Normalization, Field Mapping & Deduplication</div>
+        <div class="node-grid">
+            <div class="node-card">
+                <h4>Field Standardization</h4>
+                <ul>
+                    <li>Name, company normalize</li>
+                    <li>Phone format (E.164)</li>
+                    <li>Country (ISO 3166)</li>
+                    <li>Job title seniority mapping</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Deduplication Engine</h4>
+                <ul>
+                    <li>Email exact match</li>
+                    <li>Domain fuzzy match</li>
+                    <li>Levenshtein distance &le; 2</li>
+                    <li>Existing lead &rarr; merge</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Validation Layer</h4>
+                <ul>
+                    <li>MX record check</li>
+                    <li>WHOIS domain lookup</li>
+                    <li>Disposable email filter</li>
+                    <li>Bot/spam detection</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- STEP 2 -->
+    <div class="node node-purple">
+        <div class="node-header">Step 2 — AI Agent</div>
+        <div class="node-title">AI Research & Enrichment Agent (RAG-based)</div>
+        <div class="node-grid">
+            <div class="node-card">
+                <h4>Company Intelligence</h4>
+                <ul>
+                    <li>Industry & sub-industry</li>
+                    <li>Employee count & growth</li>
+                    <li>Revenue range & funding</li>
+                    <li>Technology stack analysis</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Intent Signal Extraction</h4>
+                <ul>
+                    <li>Website behavior analysis</li>
+                    <li>LinkedIn activity scraping</li>
+                    <li>Content consumption patterns</li>
+                    <li>Competitor evaluation signals</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Structured JSON Output</h4>
+                <ul>
+                    <li>company_profile: {...}</li>
+                    <li>intent_signals: [...]</li>
+                    <li>tech_stack: [...]</li>
+                    <li>enrichment_confidence: 0.92</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- STEP 3 -->
+    <div class="node node-purple">
+        <div class="node-header">Step 3 — AI Scoring Engine</div>
+        <div class="node-title">Lead Scoring Engine (0–100)</div>
+        <div class="node-grid">
+            <div class="node-card">
+                <h4>ICP Fit Score (0–40)</h4>
+                <ul>
+                    <li>Industry match: 0–10</li>
+                    <li>Company size: 0–10</li>
+                    <li>Region: 0–10</li>
+                    <li>Tech compatibility: 0–10</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Intent Score (0–35)</h4>
+                <ul>
+                    <li>Web visit frequency: 0–10</li>
+                    <li>Content downloads: 0–10</li>
+                    <li>Demo request signal: 0–10</li>
+                    <li>Competitor switch signal: 0–5</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Behavioral Score (0–25)</h4>
+                <ul>
+                    <li>Email open/click: 0–10</li>
+                    <li>Webinar attendance: 0–5</li>
+                    <li>Pricing page visits: 0–5</li>
+                    <li>Chatbot interaction: 0–5</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- DECISION: Confidence -->
+    <div class="decision-wrapper">
+        <div class="decision">
+            <div class="decision-label">Validation Gate</div>
+            <div class="decision-text">Confidence &ge; 0.75?</div>
+        </div>
+    </div>
+
+    <div class="connector" style="height:16px;"></div>
+
+    <!-- Human Review (low confidence) -->
+    <div class="node node-yellow" style="max-width:500px;">
+        <div class="node-header">Low Confidence Path</div>
+        <div class="node-title">Human Review Queue</div>
+        <div class="node-card">
+            <h4>Analyst Review</h4>
+            <ul>
+                <li>Verify enrichment data</li>
+                <li>Manual research supplement</li>
+                <li>Score override + reason note</li>
+                <li>Re-inject into pipeline</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <!-- DECISION: Score -->
+    <div class="decision-wrapper">
+        <div class="decision">
+            <div class="decision-label">Routing Decision</div>
+            <div class="decision-text">Score &ge; 80 AND Confidence &ge; 0.75?</div>
+        </div>
+    </div>
+
+    <div class="connector" style="height:16px;"></div>
+
+    <!-- BRANCH -->
+    <div class="branch-container">
+
+        <!-- YES BRANCH -->
+        <div class="branch-col">
+            <div class="branch-label branch-yes">YES &mdash; Hot Lead</div>
+            <div class="branch-connector"></div>
+
+            <div class="node node-purple" style="max-width:100%;">
+                <div class="node-header">AI Component</div>
+                <div class="node-title">Personalized Multi-Channel Outreach</div>
+                <div class="node-grid" style="grid-template-columns:1fr;">
+                    <div class="node-card">
+                        <h4>Email Draft</h4>
+                        <ul>
+                            <li>Personalized subject line</li>
+                            <li>Company-specific value prop</li>
+                            <li>Social proof (similar customer)</li>
+                            <li>Clear CTA</li>
+                        </ul>
+                    </div>
+                    <div class="node-card">
+                        <h4>LinkedIn Message</h4>
+                        <ul>
+                            <li>Connection request note</li>
+                            <li>Industry-specific opener</li>
+                            <li>Short value proposition</li>
+                            <li>Meeting suggestion</li>
+                        </ul>
+                    </div>
+                    <div class="node-card">
+                        <h4>Cadence Sequence</h4>
+                        <ul>
+                            <li>Day 1: Email</li>
+                            <li>Day 3: LinkedIn connect</li>
+                            <li>Day 5: Follow-up email</li>
+                            <li>Day 7: LinkedIn message</li>
+                            <li>Day 10: Phone call</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="branch-connector"></div>
+
+            <div class="node node-yellow" style="max-width:100%;">
+                <div class="node-header">Human-in-the-Loop</div>
+                <div class="node-title">Sales Review & Edit</div>
+                <div class="node-card">
+                    <h4>Rep Actions</h4>
+                    <ul>
+                        <li>Review/edit AI draft</li>
+                        <li>Add personal touch</li>
+                        <li>Adjust timing</li>
+                        <li>Approve &rarr; Send</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="branch-connector"></div>
+
+            <div class="node node-green" style="max-width:100%;">
+                <div class="node-header">Action</div>
+                <div class="node-title">Assign to Sales Rep</div>
+                <div class="node-card">
+                    <h4>Smart Routing</h4>
+                    <ul>
+                        <li>Territory matching</li>
+                        <li>Industry expertise</li>
+                        <li>Capacity balancing</li>
+                        <li>Round-robin fallback</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- NO BRANCH -->
+        <div class="branch-col">
+            <div class="branch-label branch-no">NO &mdash; Nurture</div>
+            <div class="branch-connector"></div>
+
+            <div class="node node-blue" style="max-width:100%;">
+                <div class="node-header">Traditional Automation</div>
+                <div class="node-title">Automated Nurture Workflow</div>
+                <div class="node-grid" style="grid-template-columns:1fr;">
+                    <div class="node-card">
+                        <h4>Segment Classification</h4>
+                        <ul>
+                            <li>Score 60–79: Warm &rarr; Accelerated</li>
+                            <li>Score 40–59: Cool &rarr; Standard</li>
+                            <li>Score &lt; 40: Cold &rarr; Long-term drip</li>
+                        </ul>
+                    </div>
+                    <div class="node-card">
+                        <h4>Email Sequence Engine</h4>
+                        <ul>
+                            <li>Segment-based content</li>
+                            <li>Educational materials</li>
+                            <li>Case studies</li>
+                            <li>Webinar invitations</li>
+                        </ul>
+                    </div>
+                    <div class="node-card">
+                        <h4>Re-Engagement Monitor</h4>
+                        <ul>
+                            <li>Detect new engagement</li>
+                            <li>Trigger re-scoring</li>
+                            <li>Threshold crossed &rarr; Hot path</li>
+                            <li>90 days inactive &rarr; Archive</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="rescore-loop">
+                    <div class="rescore-badge">&#x21bb; Re-engagement detected &rarr; Re-score &rarr; Back to Scoring Engine</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-spacer"></div>
+    <div class="connector"></div>
+
+    <!-- FINAL ACTIONS -->
+    <div class="node node-green">
+        <div class="node-header">Final Actions</div>
+        <div class="node-title">Integrations & Data Persistence</div>
+        <div class="node-grid">
+            <div class="node-card">
+                <h4>CRM Update</h4>
+                <ul>
+                    <li>HubSpot / Salesforce sync</li>
+                    <li>Lead stage update</li>
+                    <li>All enrichment data</li>
+                    <li>Activity timeline</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Analytics & Logging</h4>
+                <ul>
+                    <li>Scoring data persistence</li>
+                    <li>Conversion tracking</li>
+                    <li>Model performance metrics</li>
+                    <li>A/B test results</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Notifications</h4>
+                <ul>
+                    <li>Slack: #sales-leads channel</li>
+                    <li>Hot lead &rarr; Urgent alert</li>
+                    <li>Daily summary report</li>
+                    <li>Weekly pipeline review</li>
+                </ul>
+            </div>
+            <div class="node-card">
+                <h4>Data Warehouse</h4>
+                <ul>
+                    <li>Store enrichment data</li>
+                    <li>Scoring history</li>
+                    <li>Outreach performance</li>
+                    <li>Churn prediction feedback</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

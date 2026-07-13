@@ -78,5 +78,15 @@
     "comment": null,
     "domain": "All",
     "metadata": {}
+  },
+  {
+    "id": "fb_20260110172109026642",
+    "timestamp": "2026-01-10T17:21:09.026654",
+    "question": "If the losing epu stop sending after aribtration loss, does it need to re-sent the fram manualy or will cun handle that?",
+    "answer": "According to Document 3, CAN handles frame collisions and retransmissions automatically. Therefore, if the losing EPU stops sending after a arbitration loss, it does not need to resent the frame manually. The system will likely continue to operate correctly without manual intervention (Document 3).",
+    "rating": 1,
+    "comment": null,
+    "domain": "automotive",
+    "metadata": {}
   }
 ]

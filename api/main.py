@@ -539,8 +539,26 @@ async def health_check():
         except:
             pass
 
-        # Check database
-        database_ready = collection is not None and collection.count() > 0
+        # Check database and guard against collection recreation
+        global chroma_client, collection, hybrid_engine
+        documents_indexed = 0
+        database_ready = False
+        try:
+            if collection is not None:
+                documents_indexed = collection.count()
+                database_ready = documents_indexed > 0
+        except Exception:
+            # The underlying collection may have been recreated externally (e.g., reindexing)
+            # Refresh the collection reference and rebuild dependent engines
+            collection = chroma_client.get_or_create_collection(name="documents")
+            documents_indexed = collection.count()
+            database_ready = documents_indexed > 0
+            try:
+                from src.hybrid_search import HybridSearchEngine
+                hybrid_engine = HybridSearchEngine(collection)
+            except Exception:
+                # If hybrid engine rebuild fails, continue with health response
+                pass
 
         # Get cache and performance stats
         cache = get_query_cache()
@@ -555,7 +573,7 @@ async def health_check():
             status="healthy" if (ollama_running and database_ready) else "degraded",
             ollama_running=ollama_running,
             database_ready=database_ready,
-            documents_indexed=collection.count() if collection else 0,
+            documents_indexed=documents_indexed,
             cache_size=len(cache.cache),
             performance_stats=perf_stats
         )
