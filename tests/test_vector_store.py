@@ -6,7 +6,7 @@ import tempfile
 import shutil
 from pathlib import Path
 from langchain.schema import Document
-from src.vector_store import (
+from rag.retrieval.vector_store import (
     initialize_chroma_db,
     index_documents,
     query_similar_chunks,

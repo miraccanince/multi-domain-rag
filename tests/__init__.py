@@ -1,5 +1,5 @@
 """
-Unit tests for FlexiRAG.
+Unit tests for Multi-Domain RAG.
 
 Test coverage for core modules:
 - Embeddings

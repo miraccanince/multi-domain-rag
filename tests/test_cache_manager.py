@@ -3,7 +3,7 @@ Unit tests for cache manager.
 """
 import pytest
 import time
-from src.cache_manager import QueryCache
+from rag.caching.cache_manager import QueryCache
 
 
 class TestCacheManager:

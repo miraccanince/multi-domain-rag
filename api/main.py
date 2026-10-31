@@ -1,5 +1,5 @@
 """
-FastAPI Backend for RAG Documentation Assistant
+FastAPI Backend for Multi-Domain RAG
 
 This API provides RESTful endpoints for:
 - Question answering with LLM (streaming)
@@ -24,28 +24,28 @@ import json
 import chromadb
 from pathlib import Path
 from datetime import datetime
-import sys
 import time
 import shutil
 import subprocess
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from src.qa_chain import ask_question, warm_up_model, generate_answer_ollama
-from src.hybrid_search import HybridSearchEngine
-from src.cache_manager import get_query_cache, get_performance_monitor
-from src.feedback_manager import get_feedback_manager
-from src.semantic_cache import get_semantic_cache
-from src.embeddings import create_embedding
-from src.auth import get_user_manager, create_access_token, verify_token
+from rag import config
+from rag.retrieval.vector_store import get_chroma_client
+from rag.qa_chain import (ask_question, warm_up_model, generate_answer_ollama,
+                          build_prompt, format_sources, mark_cited, public_metadata,
+                          LLM_ERROR_PREFIX, NO_ANSWER)
+from rag.retrieval.hybrid_search import HybridSearchEngine
+from rag.caching.cache_manager import get_query_cache, get_performance_monitor
+from rag.feedback_manager import get_feedback_manager
+from rag.caching.semantic_cache import get_semantic_cache
+from rag.retrieval.embeddings import create_embedding
+from rag.auth import get_user_manager, create_access_token, verify_token
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="RAG Documentation Assistant API",
+    title="Multi-Domain RAG API",
     description="Retrieval-Augmented Generation API for document Q&A",
     version="1.0.0"
 )
@@ -184,32 +184,103 @@ async def startup_event():
     """Initialize ChromaDB and warm up the model."""
     global chroma_client, collection, hybrid_engine
 
-    print("🚀 Starting RAG API server...")
+    print("Starting RAG API server...")
 
     # Initialize ChromaDB
-    db_path = Path(__file__).parent.parent / "chroma_db"
-    chroma_client = chromadb.PersistentClient(path=str(db_path))
-    collection = chroma_client.get_or_create_collection(name="documents")
+    config.CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+    chroma_client = get_chroma_client(config.CHROMA_DIR)
+    collection = chroma_client.get_or_create_collection(name=config.COLLECTION_NAME)
 
-    print(f"✅ ChromaDB loaded: {collection.count():,} documents")
+    print(f"ChromaDB loaded: {collection.count():,} documents")
 
     # Initialize hybrid search engine
     hybrid_engine = HybridSearchEngine(collection)
 
     # Warm up the LLM model
-    print("🔥 Warming up LLM model...")
-    warm_up_success = warm_up_model(model="llama3.2:3b", timeout=60)
+    print("Warming up LLM model...")
+    warm_up_success = warm_up_model(model=config.LLM_MODEL, timeout=60)
 
     if warm_up_success:
-        print("✅ API server ready!")
+        print("API server ready!")
     else:
-        print("⚠️  API server started, but LLM warm-up failed. Check Ollama service.")
+        print("API server started, but LLM warm-up failed. Check Ollama service.")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown."""
-    print("🛑 Shutting down API server...")
+    print("Shutting down API server...")
+
+
+def retrieval_settings(request: "QueryRequest") -> Dict[str, Any]:
+    """Settings that change which chunks reach the LLM. Cached answers are only reused with equal settings."""
+    return {
+        "search_method": request.search_method,
+        "n_results": request.n_results,
+        "use_reranking": request.use_reranking,
+    }
+
+
+def store_in_semantic_cache(request: "QueryRequest", embedding, answer: str, sources: list):
+    """Cache a finished answer. Empty answers and LLM errors are not cached."""
+    if not request.use_cache or embedding is None:
+        return
+    if not answer or answer.startswith(LLM_ERROR_PREFIX):
+        return
+    get_semantic_cache().set(
+        query=request.question,
+        query_embedding=embedding,
+        answer=answer,
+        sources=sources,
+        domain=request.domain,
+        metadata={
+            "search_method": request.search_method,
+            "reranking_used": request.use_reranking
+        },
+        settings=retrieval_settings(request)
+    )
+
+
+def stream_cached_answer(cached: Dict[str, Any]):
+    """Replay a cached answer in the same NDJSON format as a live streamed answer."""
+    meta = cached.get("metadata", {})
+    info = {
+        "cache_hit": True,
+        "cache_similarity": meta.get("cache_similarity"),
+        "cached_query": meta.get("cached_query"),
+    }
+    yield json.dumps({"type": "metadata", "search_time": 0.0,
+                      "chunks_retrieved": len(cached["sources"]), **info}) + "\n"
+    yield json.dumps({"type": "token", "token": cached["answer"]}) + "\n"
+    yield json.dumps({"type": "done", "answer": cached["answer"],
+                      "sources": cached["sources"], "total_time": 0.0, **info}) + "\n"
+
+
+def ensure_current_collection():
+    """
+    Pick up changes made outside this process.
+
+    scripts.index_documents drops and recreates the collection. The old handle
+    then raises an error, and the keyword index no longer matches. Compare the
+    live collection (id and size) with the one the engine was built from and
+    rebuild when they differ.
+    """
+    global collection
+    if chroma_client is None:
+        return
+    current = chroma_client.get_or_create_collection(name=config.COLLECTION_NAME)
+    if (collection is None or hybrid_engine is None
+            or current.id != collection.id or current.count() != hybrid_engine.size):
+        collection = current
+        refresh_search_state()
+
+
+def refresh_search_state():
+    """Rebuild the keyword index and drop cached answers after the documents changed."""
+    global hybrid_engine
+    hybrid_engine = HybridSearchEngine(collection)
+    get_semantic_cache().clear()
+    get_query_cache().clear()
 
 
 # API Endpoints
@@ -218,7 +289,7 @@ async def shutdown_event():
 async def root():
     """Root endpoint with API information."""
     return {
-        "name": "RAG Documentation Assistant API",
+        "name": "Multi-Domain RAG API",
         "version": "1.0.0",
         "endpoints": {
             "query": "POST /query - Question answering with LLM",
@@ -239,6 +310,7 @@ async def query_documents(request: Request, query_request: QueryRequest):
     Supports streaming responses for real-time answer generation.
     """
     try:
+        ensure_current_collection()
         # Build filter metadata
         filter_metadata = {"domain": query_request.domain} if query_request.domain else None
 
@@ -251,11 +323,16 @@ async def query_documents(request: Request, query_request: QueryRequest):
             cached_result = semantic_cache.get(
                 query=query_request.question,
                 query_embedding=query_embedding,
-                domain=query_request.domain
+                domain=query_request.domain,
+                settings=retrieval_settings(query_request)
             )
 
             if cached_result:
-                # Return cached result immediately
+                if query_request.stream:
+                    return StreamingResponse(
+                        stream_cached_answer(cached_result),
+                        media_type="application/x-ndjson"
+                    )
                 return QueryResponse(
                     question=query_request.question,
                     answer=cached_result['answer'],
@@ -270,8 +347,8 @@ async def query_documents(request: Request, query_request: QueryRequest):
                 start_time = time.time()
 
                 # Step 1: Retrieve chunks
-                from src.vector_store import query_similar_chunks
-                from src.reranker import rerank_chunks
+                from rag.retrieval.vector_store import query_similar_chunks
+                from rag.retrieval.reranker import rerank_chunks
 
                 search_start = time.time()
                 initial_n = query_request.n_results * 3 if query_request.use_reranking else query_request.n_results
@@ -309,86 +386,73 @@ async def query_documents(request: Request, query_request: QueryRequest):
                     "chunks_retrieved": len(chunks)
                 }) + "\n"
 
+                sources = format_sources(chunks, metadatas)
+
+                # Nothing retrieved: do not ask the LLM to answer from an empty context
+                if not chunks:
+                    yield json.dumps({"type": "token", "token": NO_ANSWER}) + "\n"
+                    yield json.dumps({
+                        "type": "done",
+                        "answer": NO_ANSWER,
+                        "sources": [],
+                        "total_time": time.time() - start_time
+                    }) + "\n"
+                    return
+
                 # Step 2: Stream LLM response
                 import requests
 
-                # Build prompt
-                context_parts = []
-                for i, chunk in enumerate(chunks[:3], 1):
-                    preview = chunk[:300] if len(chunk) > 300 else chunk
-                    context_parts.append(f"[Document {i}]\n{preview}")
-
-                context = "\n\n".join(context_parts)
-                prompt = f"""You are a helpful assistant. Answer based ONLY on the context below.
-
-Context:
-{context}
-
-Question: {query_request.question}
-
-Instructions:
-- Be concise (2-3 sentences max)
-- Cite document numbers
-- If not in context, say "I don't have enough information"
-
-Answer:"""
-
-                # Stream from Ollama
-                response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={
-                        "model": "llama3.2:3b",
-                        "prompt": prompt,
-                        "stream": True,
-                        "options": {
-                            "num_predict": 150,
-                            "temperature": 0.7,
-                            "top_p": 0.9
-                        }
-                    },
-                    stream=True,
-                    timeout=30
-                )
-
+                prompt = build_prompt(query_request.question, chunks)
                 full_answer = ""
-                for line in response.iter_lines(decode_unicode=True):
-                    if line:
-                        try:
-                            data = json.loads(line)
+                failed = False
+
+                try:
+                    response = requests.post(
+                        f"{config.OLLAMA_URL}/api/generate",
+                        json={
+                            "model": config.LLM_MODEL,
+                            "prompt": prompt,
+                            "stream": True,
+                            "options": {
+                                "num_predict": 150,
+                                "temperature": 0.7,
+                                "top_p": 0.9
+                            }
+                        },
+                        stream=True,
+                        timeout=30
+                    )
+                    if response.status_code != 200:
+                        raise RuntimeError(f"Ollama returned HTTP {response.status_code}")
+
+                    for line in response.iter_lines(decode_unicode=True):
+                        if line:
+                            try:
+                                data = json.loads(line)
+                            except json.JSONDecodeError:
+                                continue
                             if 'response' in data:
                                 token = data['response']
                                 full_answer += token
-                                # Send token
-                                yield json.dumps({
-                                    "type": "token",
-                                    "token": token
-                                }) + "\n"
-
+                                yield json.dumps({"type": "token", "token": token}) + "\n"
                             if data.get('done', False):
                                 break
-                        except:
-                            continue
+                except Exception as e:
+                    # Ollama unreachable or failed part way: report it in the stream
+                    failed = True
+                    message = f"{LLM_ERROR_PREFIX}{e}"
+                    full_answer = (full_answer + "\n" + message).strip()
+                    yield json.dumps({"type": "token", "token": message}) + "\n"
 
-                # Send final response with sources
-                sources = []
-                for i, metadata in enumerate(metadatas):
-                    source_info = {
-                        "source": metadata.get('source', 'Unknown'),
-                        "source_type": metadata.get('source_type', 'pdf'),
-                        "chunk_preview": chunks[i][:200] + "..."
-                    }
-                    if metadata.get('source_type') == 'csv':
-                        source_info['row_id'] = metadata.get('row_id', 'N/A')
-                        source_info['brand'] = metadata.get('brand', 'N/A')
-                        source_info['category'] = metadata.get('category', 'N/A')
-                    else:
-                        source_info['page'] = metadata.get('page', 'N/A')
-                    sources.append(source_info)
+                full_answer = full_answer.strip()
+                mark_cited(full_answer, sources)
+                if not failed:
+                    store_in_semantic_cache(query_request, query_embedding, full_answer, sources)
 
                 total_time = time.time() - start_time
                 yield json.dumps({
                     "type": "done",
-                    "answer": full_answer.strip(),
+                    "answer": full_answer,
                     "sources": sources,
                     "total_time": total_time
                 }) + "\n"
@@ -408,23 +472,12 @@ Answer:"""
                 search_method=query_request.search_method,
                 use_reranking=query_request.use_reranking,
                 use_cache=query_request.use_cache,
-                stream=False
+                stream=False,
+                engine=hybrid_engine
             )
 
             # Store in semantic cache (if enabled and not already cached)
-            if query_request.use_cache and query_embedding is not None:
-                semantic_cache = get_semantic_cache()
-                semantic_cache.set(
-                    query=query_request.question,
-                    query_embedding=query_embedding,
-                    answer=result["answer"],
-                    sources=result["sources"],
-                    domain=query_request.domain,
-                    metadata={
-                        "search_method": query_request.search_method,
-                        "reranking_used": query_request.use_reranking
-                    }
-                )
+            store_in_semantic_cache(query_request, query_embedding, result["answer"], result["sources"])
 
             return QueryResponse(
                 question=result["question"],
@@ -447,9 +500,10 @@ async def search_documents(request: Request, search_request: SearchRequest):
     """
     Search for relevant documents without LLM generation.
 
-    Returns raw search results with metadata.
+    Returns search results with metadata. File names are shown without directories and PDF pages start at 1.
     """
     try:
+        ensure_current_collection()
         if search_request.search_method in ["hybrid", "bm25"]:
             results = hybrid_engine.search(
                 query=search_request.query,
@@ -460,7 +514,7 @@ async def search_documents(request: Request, search_request: SearchRequest):
         else:
             # Semantic search
             filter_metadata = {"domain": search_request.domain} if search_request.domain else None
-            from src.vector_store import query_similar_chunks
+            from rag.retrieval.vector_store import query_similar_chunks
             chroma_results = query_similar_chunks(
                 collection,
                 search_request.query,
@@ -476,6 +530,8 @@ async def search_documents(request: Request, search_request: SearchRequest):
                 }
                 for i in range(len(chroma_results['documents'][0]))
             ]
+
+        results = [{**r, "metadata": public_metadata(r["metadata"])} for r in results]
 
         return SearchResponse(
             query=search_request.query,
@@ -497,6 +553,7 @@ async def get_domains():
     Get list of available domains with document counts.
     """
     try:
+        ensure_current_collection()
         # Get all metadatas
         all_data = collection.get(include=["metadatas"])
         metadatas = all_data['metadatas']
@@ -534,7 +591,7 @@ async def health_check():
         import requests
         ollama_running = False
         try:
-            resp = requests.get("http://localhost:11434/api/tags", timeout=2)
+            resp = requests.get(f"{config.OLLAMA_URL}/api/tags", timeout=2)
             ollama_running = resp.status_code == 200
         except:
             pass
@@ -550,11 +607,11 @@ async def health_check():
         except Exception:
             # The underlying collection may have been recreated externally (e.g., reindexing)
             # Refresh the collection reference and rebuild dependent engines
-            collection = chroma_client.get_or_create_collection(name="documents")
+            collection = chroma_client.get_or_create_collection(name=config.COLLECTION_NAME)
             documents_indexed = collection.count()
             database_ready = documents_indexed > 0
             try:
-                from src.hybrid_search import HybridSearchEngine
+                from rag.retrieval.hybrid_search import HybridSearchEngine
                 hybrid_engine = HybridSearchEngine(collection)
             except Exception:
                 # If hybrid engine rebuild fails, continue with health response
@@ -702,6 +759,7 @@ async def upload_document(
     global collection, hybrid_engine
 
     try:
+        ensure_current_collection()
         # Validate file type
         allowed_extensions = ['.pdf', '.csv']
         file_ext = Path(file.filename).suffix.lower()
@@ -713,7 +771,7 @@ async def upload_document(
             )
 
         # Create domain directory if it doesn't exist
-        data_dir = Path(__file__).parent.parent / "data" / domain
+        data_dir = config.DATA_DIR / domain
         data_dir.mkdir(parents=True, exist_ok=True)
 
         # Save file
@@ -731,9 +789,9 @@ async def upload_document(
             shutil.copyfileobj(file.file, buffer)
 
         # Index the file directly (incremental, doesn't clear existing data)
-        from src.pdf_loader import load_pdfs_from_directory
-        from src.csv_loader import load_csv_as_documents
-        from src.vector_store import index_documents
+        from rag.ingestion.pdf_loader import load_pdfs_from_directory
+        from rag.ingestion.csv_loader import load_csv_as_documents
+        from rag.retrieval.vector_store import index_documents
 
         documents = []
 
@@ -758,11 +816,9 @@ async def upload_document(
         index_documents(collection, documents)
 
         # Reload collection to get updated count
-        collection = chroma_client.get_collection(name="documents")
+        collection = chroma_client.get_collection(name=config.COLLECTION_NAME)
 
-        # Rebuild hybrid engine to include new documents
-        from src.hybrid_search import HybridSearchEngine
-        hybrid_engine = HybridSearchEngine(collection)
+        refresh_search_state()
 
         return {
             "status": "success",
@@ -801,6 +857,7 @@ async def delete_domain(
     global collection, hybrid_engine
 
     try:
+        ensure_current_collection()
         # Get all documents from this domain to count them
         results = collection.get(
             where={"domain": domain_name},
@@ -819,7 +876,7 @@ async def delete_domain(
         collection.delete(where={"domain": domain_name})
 
         # Delete domain folder from filesystem
-        domain_dir = Path(__file__).parent.parent / "data" / domain_name
+        domain_dir = config.DATA_DIR / domain_name
         if domain_dir.exists():
             shutil.rmtree(domain_dir)
             folder_deleted = True
@@ -827,11 +884,9 @@ async def delete_domain(
             folder_deleted = False
 
         # Reload collection to get updated count
-        collection = chroma_client.get_collection(name="documents")
+        collection = chroma_client.get_collection(name=config.COLLECTION_NAME)
 
-        # Rebuild hybrid engine
-        from src.hybrid_search import HybridSearchEngine
-        hybrid_engine = HybridSearchEngine(collection)
+        refresh_search_state()
 
         return {
             "status": "success",
@@ -942,30 +997,6 @@ async def get_current_user_info(current_user: Dict[str, Any] = Depends(require_a
         Current user information
     """
     return UserResponse(**current_user)
-
-
-@app.get("/auth/users", tags=["Authentication"])
-async def list_users(current_user: Dict[str, Any] = Depends(require_auth)):
-    """
-    List all registered users.
-
-    Requires: Authentication
-
-    Returns:
-        List of all users (without passwords)
-    """
-    try:
-        user_manager = get_user_manager()
-        users = user_manager.get_all_users()
-
-        return {
-            "status": "success",
-            "total_users": len(users),
-            "users": users
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

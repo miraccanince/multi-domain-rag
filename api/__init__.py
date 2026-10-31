@@ -1,5 +1,5 @@
 """
-RAG Documentation Assistant API
+Multi-Domain RAG API
 
 FastAPI backend for document question-answering and search.
 """

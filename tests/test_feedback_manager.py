@@ -5,8 +5,9 @@ Unit tests for FeedbackManager - User feedback collection and analytics
 import pytest
 import json
 import tempfile
+from datetime import date, timedelta
 from pathlib import Path
-from src.feedback_manager import FeedbackManager
+from rag.feedback_manager import FeedbackManager
 
 
 class TestFeedbackManager:
@@ -199,8 +200,8 @@ class TestFeedbackManager:
 
         # Export with date range
         csv_data = feedback_mgr.export_to_csv(
-            start_date="2025-01-01",
-            end_date="2025-12-31"
+            start_date=(date.today() - timedelta(days=1)).isoformat(),
+            end_date=(date.today() + timedelta(days=1)).isoformat()
         )
 
         # Should include entries within date range
@@ -234,8 +235,8 @@ class TestFeedbackManager:
         feedback_mgr.save_feedback("Q2", "A2", rating=-1)
 
         json_data = feedback_mgr.export_to_json(
-            start_date="2025-01-01",
-            end_date="2025-12-31"
+            start_date=(date.today() - timedelta(days=1)).isoformat(),
+            end_date=(date.today() + timedelta(days=1)).isoformat()
         )
         parsed = json.loads(json_data)
 
@@ -262,3 +263,15 @@ class TestFeedbackManager:
         # Should properly escape quotes and commas
         assert csv_data is not None
         assert '"CAN"' in csv_data or 'CAN' in csv_data
+
+
+    def test_export_date_filter_excludes_outside_range(self, feedback_mgr):
+        """Entries outside the requested range are not exported."""
+        feedback_mgr.save_feedback("Q1", "A1", rating=1)
+
+        past = (date.today() - timedelta(days=10)).isoformat()
+        past_end = (date.today() - timedelta(days=5)).isoformat()
+        assert json.loads(feedback_mgr.export_to_json(past, past_end)) == []
+
+        future = (date.today() + timedelta(days=5)).isoformat()
+        assert json.loads(feedback_mgr.export_to_json(start_date=future)) == []

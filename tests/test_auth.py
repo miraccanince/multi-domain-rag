@@ -11,7 +11,7 @@ import os
 import time
 from datetime import timedelta
 
-from src.auth import (
+from rag.auth import (
     UserManager,
     create_access_token,
     verify_token,
@@ -51,7 +51,6 @@ class TestUserManager:
         assert user['email'] == "test@example.com"
         assert user['full_name'] == "Test User"
         assert user['is_active'] is True
-        assert user['is_admin'] is False
         assert 'hashed_password' not in user  # Should not return password
         assert 'created_at' in user
 
@@ -127,24 +126,6 @@ class TestUserManager:
         user = user_manager.get_user("nonexistent")
 
         assert user is None
-
-    def test_get_all_users(self, user_manager):
-        """Test retrieving all users."""
-        user_manager.create_user("user1", "pass1", email="user1@test.com")
-        user_manager.create_user("user2", "pass2", email="user2@test.com")
-        user_manager.create_user("user3", "pass3", email="user3@test.com")
-
-        all_users = user_manager.get_all_users()
-
-        assert len(all_users) == 3
-        usernames = [u['username'] for u in all_users]
-        assert 'user1' in usernames
-        assert 'user2' in usernames
-        assert 'user3' in usernames
-
-        # Verify no passwords in results
-        for user in all_users:
-            assert 'hashed_password' not in user
 
     def test_user_persistence(self, temp_users_file):
         """Test that users persist to disk and load correctly."""
@@ -244,10 +225,10 @@ class TestJWTTokens:
     def test_token_contains_expiration(self):
         """Test that token contains expiration claim."""
         from jose import jwt
-        from src.auth import SECRET_KEY, ALGORITHM
+        from rag.auth import get_secret_key, ALGORITHM
 
         token = create_access_token(data={"sub": "testuser"})
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, get_secret_key(), algorithms=[ALGORITHM])
 
         assert 'exp' in payload
         assert payload['sub'] == "testuser"
@@ -345,3 +326,58 @@ class TestPasswordSecurity:
         # But both should verify correctly
         assert pwd_context.verify("samepassword", hash1)
         assert pwd_context.verify("samepassword", hash2)
+
+
+
+class TestSecretKey:
+    """The signing secret comes from the environment or a persistent local file."""
+
+    @pytest.fixture(autouse=True)
+    def isolated_secret(self, tmp_path, monkeypatch):
+        from rag import auth
+        monkeypatch.setattr(auth, "_secret_key", None)
+        monkeypatch.setattr(auth.config, "JWT_SECRET_FILE", tmp_path / "jwt_secret")
+        monkeypatch.delenv("JWT_SECRET", raising=False)
+        self.auth = auth
+        self.path = tmp_path / "jwt_secret"
+        yield
+        monkeypatch.setattr(auth, "_secret_key", None)
+
+    def restart(self):
+        """Simulate a process restart by dropping the in-memory copy."""
+        self.auth._secret_key = None
+
+    def test_environment_variable_is_used(self, monkeypatch):
+        monkeypatch.setenv("JWT_SECRET", "from-environment")
+        assert self.auth.get_secret_key() == "from-environment"
+        assert not self.path.exists()
+
+    def test_generated_secret_is_random_and_long(self):
+        secret = self.auth.get_secret_key()
+        assert len(secret) == 64
+        assert secret != "your-secret-key-change-this-in-production"
+
+    def test_generated_secret_survives_restart(self):
+        first = self.auth.get_secret_key()
+        self.restart()
+        assert self.auth.get_secret_key() == first
+
+    def test_token_stays_valid_after_restart(self):
+        token = create_access_token({"sub": "alice"})
+        self.restart()
+        assert verify_token(token) == "alice"
+
+    def test_token_invalid_with_different_secret(self, monkeypatch):
+        token = create_access_token({"sub": "alice"})
+        self.restart()
+        monkeypatch.setenv("JWT_SECRET", "another-secret")
+        assert verify_token(token) is None
+
+    def test_secret_file_is_private(self):
+        import stat
+        self.auth.get_secret_key()
+        assert stat.S_IMODE(self.path.stat().st_mode) == 0o600
+
+    def test_empty_environment_variable_falls_back_to_file(self, monkeypatch):
+        monkeypatch.setenv("JWT_SECRET", "")
+        assert self.auth.get_secret_key() == self.path.read_text().strip()

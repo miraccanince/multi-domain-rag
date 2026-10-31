@@ -1,10 +1,15 @@
 # API Keys and secrets
 .env
 
-# Data files
-data/
+# Documents and generated state
+/data/
+/storage/
 *.pdf
 *.csv
+!examples/**/*.pdf
+!examples/**/*.csv
+!eval/data/*.csv
+!eval/results/*.csv
 
 # Python
 __pycache__/
@@ -25,20 +30,18 @@ ENV/
 *.swp
 *.swo
 
-# ChromaDB
-chroma_db/
 *.db
-
-# BM25 Index (generated)
 *.pkl
 
 # OS
 .DS_Store
 
-# Prevent nested repository
-FlexiRAG/
-
 # Test coverage
 htmlcov/
 .coverage
 .pytest_cache/
+
+# Evaluation: downloaded PDFs and the evaluation index are generated
+eval/data/nist/
+eval/work/
+eval/results/test_runs.log

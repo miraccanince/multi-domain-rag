@@ -3,7 +3,7 @@ Unit tests for embedding module.
 """
 import pytest
 import numpy as np
-from src.embeddings import create_embedding, create_embeddings_batch
+from rag.retrieval.embeddings import create_embedding, create_embeddings_batch
 
 
 class TestEmbeddings:

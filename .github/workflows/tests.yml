@@ -20,7 +20,7 @@ jobs:
         python-version: '3.11'
 
     - name: Cache pip dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
@@ -32,13 +32,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run tests with pytest
+    - name: Run tests with coverage
       run: |
-        pytest tests/ -v --tb=short
-
-    - name: Generate coverage report
-      run: |
-        pytest tests/ --cov=src --cov-report=term --cov-report=html
+        pytest tests/ --cov=rag --cov-report=term --cov-report=html
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4

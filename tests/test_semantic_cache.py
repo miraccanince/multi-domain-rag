@@ -11,7 +11,7 @@ import tempfile
 import os
 from pathlib import Path
 
-from src.semantic_cache import SemanticCache
+from rag.caching.semantic_cache import SemanticCache
 
 
 class TestSemanticCache:
@@ -321,3 +321,38 @@ class TestSemanticCache:
         assert result['sources'] == sources
         assert len(result['sources']) == 2
         assert result['sources'][0]['page'] == 1
+
+
+class TestRetrievalSettingsKey:
+    """A cached answer is reused only when the retrieval settings are equal."""
+
+    def test_same_settings_hit(self, tmp_path):
+        cache = SemanticCache(cache_file=tmp_path / "c.json")
+        settings = {"search_method": "hybrid", "n_results": 3, "use_reranking": True}
+        cache.set("Q", np.array([1.0, 0.0]), "A", [], domain="d", settings=settings)
+        assert cache.get("Q", np.array([1.0, 0.0]), domain="d", settings=dict(settings))
+
+    @pytest.mark.parametrize("other", [
+        {"search_method": "bm25", "n_results": 3, "use_reranking": True},
+        {"search_method": "hybrid", "n_results": 5, "use_reranking": True},
+        {"search_method": "hybrid", "n_results": 3, "use_reranking": False},
+        None,
+    ])
+    def test_different_settings_miss(self, tmp_path, other):
+        cache = SemanticCache(cache_file=tmp_path / "c.json")
+        settings = {"search_method": "hybrid", "n_results": 3, "use_reranking": True}
+        cache.set("Q", np.array([1.0, 0.0]), "A", [], domain="d", settings=settings)
+        assert cache.get("Q", np.array([1.0, 0.0]), domain="d", settings=other) is None
+
+    def test_entry_without_stored_settings_is_not_reused(self, tmp_path):
+        cache = SemanticCache(cache_file=tmp_path / "c.json")
+        cache.set("Q", np.array([1.0, 0.0]), "A", [], domain="d")  # older entries look like this
+        settings = {"search_method": "hybrid", "n_results": 3, "use_reranking": True}
+        assert cache.get("Q", np.array([1.0, 0.0]), domain="d", settings=settings) is None
+
+    def test_settings_survive_a_restart(self, tmp_path):
+        path = tmp_path / "c.json"
+        settings = {"search_method": "bm25", "n_results": 3, "use_reranking": False}
+        SemanticCache(cache_file=path).set("Q", np.array([1.0, 0.0]), "A", [], settings=settings)
+        reloaded = SemanticCache(cache_file=path)
+        assert reloaded.get("Q", np.array([1.0, 0.0]), settings=settings)

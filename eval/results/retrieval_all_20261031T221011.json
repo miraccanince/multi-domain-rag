@@ -1,0 +1,3988 @@
+{
+  "environment": {
+    "timestamp_utc": "2026-10-31T22:10:11+00:00",
+    "git_commit": "84be29826be9d61ef72b96915794fea6e6c75c7d",
+    "git_uncommitted_changes": true,
+    "python": "3.13.7",
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "packages": {
+      "sentence-transformers": "5.7.0",
+      "torch": "2.15.0",
+      "chromadb": "0.5.23",
+      "rank-bm25": "0.2.2",
+      "pypdf": "5.1.0",
+      "pandas": "3.1.0",
+      "numpy": "2.5.4",
+      "langchain": "0.3.15"
+    },
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "llm": {
+      "name": "llama3.2:3b",
+      "ollama_version": "0.13.3",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "llama",
+        "families": [
+          "llama"
+        ],
+        "parameter_size": "3.2B",
+        "quantization_level": "Q4_K_M"
+      },
+      "parameters": "stop                           \"<|start_header_id|>\"\nstop                           \"<|end_header_id|>\"\nstop                           \"<|eot_id|>\""
+    },
+    "pipeline": {
+      "pdf_chunk_size": 1000,
+      "pdf_chunk_overlap": 200,
+      "rrf_k": 60,
+      "context_chunks": 3,
+      "context_chars_per_chunk": 1000,
+      "reranker_preview_chars": 1000,
+      "reranker_temperature": 0.1,
+      "reranker_candidates_per_final_result": 3
+    },
+    "data": {
+      "nist_sha256": {
+        "NIST.SP.800-40r4.pdf": "351f4a828d6c0bc8bf98f25ba3f87ec5add0ed8cf8bb4a6e6cb4e7e4a9731833",
+        "NIST.SP.800-61r3.pdf": "e5593d6bb85daecec7e8d9549400c7b3473bcc3f06e469c82218073afa7fba2d",
+        "NIST.SP.800-63B-4.pdf": "d9ab89576b5ae2cfb3ba37781110788dea27a85a5079496dbfc1a79834670afd",
+        "NIST.SP.800-88r2.pdf": "39bb805c72723ed74f08e5806cd8463ca2554a62abb4f97b9d19c0398a8a7c55"
+      },
+      "epa_zip_sha256": "33d32caa0343cdb11c47be631e8a80b7ed7c351ee8503646a4e96485bd67b22f",
+      "epa_snapshot_sha256": "7b1a79543f1c6cc0b6e34fe5909af8457aef15d7cb9335f5d5400ce742feb910",
+      "questions_sha256": "c1847b355031e76bb09e399ce2224a3d1844520aa20b52d5a38963432074bf68"
+    }
+  },
+  "arguments": {
+    "split": "all",
+    "final": true,
+    "allow_rerun": false,
+    "repeats": 3,
+    "configs": [
+      "bm25",
+      "vector",
+      "hybrid",
+      "hybrid_rerank"
+    ]
+  },
+  "aggregate": {
+    "technical (exact, paraphrase, multi_doc)": {
+      "bm25": {
+        "questions": 15,
+        "mrr@10": 0.434,
+        "mrr@3": 0.4,
+        "span_recall@1": 0.3333,
+        "span_recall@10": 0.65,
+        "span_recall@3": 0.45,
+        "span_recall@5": 0.45,
+        "latency_ms_median": 3.3,
+        "latency_ms_p95": 18.2
+      },
+      "vector": {
+        "questions": 15,
+        "mrr@10": 0.3471,
+        "mrr@3": 0.3,
+        "span_recall@1": 0.2667,
+        "span_recall@10": 0.65,
+        "span_recall@3": 0.2833,
+        "span_recall@5": 0.3167,
+        "latency_ms_median": 14.3,
+        "latency_ms_p95": 54.6
+      },
+      "hybrid": {
+        "questions": 15,
+        "mrr@10": 0.4278,
+        "mrr@3": 0.3889,
+        "span_recall@1": 0.15,
+        "span_recall@10": 0.7167,
+        "span_recall@3": 0.55,
+        "span_recall@5": 0.5833,
+        "latency_ms_median": 17.1,
+        "latency_ms_p95": 57.2
+      },
+      "hybrid_rerank": {
+        "questions": 15,
+        "mrr@3": 0.3333,
+        "span_recall@1": 0.2,
+        "span_recall@3": 0.5333,
+        "latency_ms_median": 1099.6,
+        "latency_ms_p95": 1785.6
+      }
+    },
+    "vehicles (exact, semantic)": {
+      "bm25": {
+        "questions": 6,
+        "capped_recall@1": 0.8333,
+        "capped_recall@10": 0.8667,
+        "capped_recall@3": 0.7778,
+        "capped_recall@5": 0.8083,
+        "hit@1": 0.8333,
+        "hit@10": 1.0,
+        "hit@3": 0.8333,
+        "hit@5": 1.0,
+        "loose_capped_recall@1": 0.8333,
+        "loose_capped_recall@10": 0.9083,
+        "loose_capped_recall@3": 0.7778,
+        "loose_capped_recall@5": 0.8333,
+        "loose_hit@1": 0.8333,
+        "loose_hit@10": 1.0,
+        "loose_hit@3": 0.8333,
+        "loose_hit@5": 1.0,
+        "loose_mrr@10": 0.8667,
+        "loose_mrr@3": 0.8333,
+        "loose_precision@1": 0.8333,
+        "loose_precision@10": 0.8667,
+        "loose_precision@3": 0.7778,
+        "loose_precision@5": 0.8333,
+        "mrr@10": 0.8667,
+        "mrr@3": 0.8333,
+        "precision@1": 0.8333,
+        "precision@10": 0.6667,
+        "precision@3": 0.7778,
+        "precision@5": 0.7667,
+        "latency_ms_median": 8.5,
+        "latency_ms_p95": 57.3
+      },
+      "vector": {
+        "questions": 6,
+        "capped_recall@1": 0.1667,
+        "capped_recall@10": 0.325,
+        "capped_recall@3": 0.1667,
+        "capped_recall@5": 0.2417,
+        "hit@1": 0.1667,
+        "hit@10": 0.6667,
+        "hit@3": 0.5,
+        "hit@5": 0.6667,
+        "loose_capped_recall@1": 0.5,
+        "loose_capped_recall@10": 0.4917,
+        "loose_capped_recall@3": 0.5,
+        "loose_capped_recall@5": 0.5,
+        "loose_hit@1": 0.5,
+        "loose_hit@10": 0.6667,
+        "loose_hit@3": 0.6667,
+        "loose_hit@5": 0.6667,
+        "loose_mrr@10": 0.5556,
+        "loose_mrr@3": 0.5556,
+        "loose_precision@1": 0.5,
+        "loose_precision@10": 0.4667,
+        "loose_precision@3": 0.5,
+        "loose_precision@5": 0.5,
+        "mrr@10": 0.3472,
+        "mrr@3": 0.3056,
+        "precision@1": 0.1667,
+        "precision@10": 0.25,
+        "precision@3": 0.1667,
+        "precision@5": 0.2333,
+        "latency_ms_median": 234.7,
+        "latency_ms_p95": 277.5
+      },
+      "hybrid": {
+        "questions": 6,
+        "capped_recall@1": 0.3333,
+        "capped_recall@10": 0.6417,
+        "capped_recall@3": 0.3889,
+        "capped_recall@5": 0.4917,
+        "hit@1": 0.3333,
+        "hit@10": 1.0,
+        "hit@3": 0.6667,
+        "hit@5": 1.0,
+        "loose_capped_recall@1": 0.5,
+        "loose_capped_recall@10": 0.6843,
+        "loose_capped_recall@3": 0.5,
+        "loose_capped_recall@5": 0.6,
+        "loose_hit@1": 0.5,
+        "loose_hit@10": 1.0,
+        "loose_hit@3": 0.6667,
+        "loose_hit@5": 1.0,
+        "loose_mrr@10": 0.6583,
+        "loose_mrr@3": 0.5833,
+        "loose_precision@1": 0.5,
+        "loose_precision@10": 0.65,
+        "loose_precision@3": 0.5,
+        "loose_precision@5": 0.6,
+        "mrr@10": 0.575,
+        "mrr@3": 0.5,
+        "precision@1": 0.3333,
+        "precision@10": 0.4667,
+        "precision@3": 0.3889,
+        "precision@5": 0.4667,
+        "latency_ms_median": 192.5,
+        "latency_ms_p95": 218.1
+      },
+      "hybrid_rerank": {
+        "questions": 6,
+        "capped_recall@1": 0.3333,
+        "capped_recall@3": 0.6667,
+        "hit@1": 0.3333,
+        "hit@3": 1.0,
+        "loose_capped_recall@1": 0.3333,
+        "loose_capped_recall@3": 0.7222,
+        "loose_hit@1": 0.3333,
+        "loose_hit@3": 1.0,
+        "loose_mrr@10": 0.6389,
+        "loose_mrr@3": 0.6389,
+        "loose_precision@1": 0.3333,
+        "loose_precision@3": 0.7222,
+        "mrr@3": 0.6389,
+        "precision@1": 0.3333,
+        "precision@3": 0.6667,
+        "latency_ms_median": 1480.5,
+        "latency_ms_p95": 2130.2
+      }
+    },
+    "vehicles structured (informational)": {
+      "bm25": {
+        "questions": 4,
+        "capped_recall@1": 0.0,
+        "capped_recall@10": 0.05,
+        "capped_recall@3": 0.0,
+        "capped_recall@5": 0.05,
+        "hit@1": 0.0,
+        "hit@10": 0.25,
+        "hit@3": 0.0,
+        "hit@5": 0.25,
+        "loose_capped_recall@1": 0.0,
+        "loose_capped_recall@10": 0.075,
+        "loose_capped_recall@3": 0.0833,
+        "loose_capped_recall@5": 0.1,
+        "loose_hit@1": 0.0,
+        "loose_hit@10": 0.5,
+        "loose_hit@3": 0.25,
+        "loose_hit@5": 0.5,
+        "loose_mrr@10": 0.1333,
+        "loose_mrr@3": 0.0833,
+        "loose_precision@1": 0.0,
+        "loose_precision@10": 0.075,
+        "loose_precision@3": 0.0833,
+        "loose_precision@5": 0.1,
+        "mrr@10": 0.05,
+        "mrr@3": 0.0,
+        "precision@1": 0.0,
+        "precision@10": 0.05,
+        "precision@3": 0.0,
+        "precision@5": 0.05,
+        "latency_ms_median": 5.9,
+        "latency_ms_p95": 9.2
+      },
+      "vector": {
+        "questions": 4,
+        "capped_recall@1": 0.5,
+        "capped_recall@10": 0.3,
+        "capped_recall@3": 0.4167,
+        "capped_recall@5": 0.35,
+        "hit@1": 0.5,
+        "hit@10": 0.5,
+        "hit@3": 0.5,
+        "hit@5": 0.5,
+        "loose_capped_recall@1": 0.75,
+        "loose_capped_recall@10": 0.325,
+        "loose_capped_recall@3": 0.5,
+        "loose_capped_recall@5": 0.4,
+        "loose_hit@1": 0.75,
+        "loose_hit@10": 0.75,
+        "loose_hit@3": 0.75,
+        "loose_hit@5": 0.75,
+        "loose_mrr@10": 0.75,
+        "loose_mrr@3": 0.75,
+        "loose_precision@1": 0.75,
+        "loose_precision@10": 0.325,
+        "loose_precision@3": 0.5,
+        "loose_precision@5": 0.4,
+        "mrr@10": 0.5,
+        "mrr@3": 0.5,
+        "precision@1": 0.5,
+        "precision@10": 0.3,
+        "precision@3": 0.4167,
+        "precision@5": 0.35,
+        "latency_ms_median": 226.6,
+        "latency_ms_p95": 240.3
+      },
+      "hybrid": {
+        "questions": 4,
+        "capped_recall@1": 0.5,
+        "capped_recall@10": 0.225,
+        "capped_recall@3": 0.3333,
+        "capped_recall@5": 0.3,
+        "hit@1": 0.5,
+        "hit@10": 0.5,
+        "hit@3": 0.5,
+        "hit@5": 0.5,
+        "loose_capped_recall@1": 0.75,
+        "loose_capped_recall@10": 0.3,
+        "loose_capped_recall@3": 0.4167,
+        "loose_capped_recall@5": 0.35,
+        "loose_hit@1": 0.75,
+        "loose_hit@10": 0.75,
+        "loose_hit@3": 0.75,
+        "loose_hit@5": 0.75,
+        "loose_mrr@10": 0.75,
+        "loose_mrr@3": 0.75,
+        "loose_precision@1": 0.75,
+        "loose_precision@10": 0.3,
+        "loose_precision@3": 0.4167,
+        "loose_precision@5": 0.35,
+        "mrr@10": 0.5,
+        "mrr@3": 0.5,
+        "precision@1": 0.5,
+        "precision@10": 0.225,
+        "precision@3": 0.3333,
+        "precision@5": 0.3,
+        "latency_ms_median": 182.1,
+        "latency_ms_p95": 217.7
+      },
+      "hybrid_rerank": {
+        "questions": 4,
+        "capped_recall@1": 0.25,
+        "capped_recall@3": 0.1667,
+        "hit@1": 0.25,
+        "hit@3": 0.25,
+        "loose_capped_recall@1": 0.25,
+        "loose_capped_recall@3": 0.25,
+        "loose_hit@1": 0.25,
+        "loose_hit@3": 0.5,
+        "loose_mrr@10": 0.3333,
+        "loose_mrr@3": 0.3333,
+        "loose_precision@1": 0.25,
+        "loose_precision@3": 0.25,
+        "mrr@3": 0.25,
+        "precision@1": 0.25,
+        "precision@3": 0.1667,
+        "latency_ms_median": 1590.8,
+        "latency_ms_p95": 1667.7
+      }
+    }
+  },
+  "per_question": [
+    {
+      "question": {
+        "id": "D01",
+        "split": "dev",
+        "domain": "technical",
+        "category": "exact",
+        "question": "What is the minimum password length when a password is the only authentication factor?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-63B-4|24|9b7376bf5419",
+            "NIST.SP.800-63B-4|97|7cefa3813507",
+            "NIST.SP.800-63B-4|26|4d423a206f08",
+            "NIST.SP.800-63B-4|24|ef5f02a63f1d",
+            "NIST.SP.800-63B-4|26|e23613b614c8",
+            "NIST.SP.800-63B-4|38|a62ebd4e6c90",
+            "NIST.SP.800-63B-4|26|b05eb7d77716",
+            "NIST.SP.800-63B-4|18|dd3f1adb9183",
+            "NIST.SP.800-63B-4|25|bf125890cd80",
+            "NIST.SP.800-63B-4|98|39c5bbf18325"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 1.425250004103873,
+          "latency_ms_all": [
+            6.1,
+            1.4,
+            1.1
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-63B-4|97|7cefa3813507",
+            "NIST.SP.800-63B-4|98|ac495b876d57",
+            "NIST.SP.800-63B-4|82|aeacf1c5c2bb",
+            "NIST.SP.800-63B-4|100|ab6157458170",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|97|7c9eaca8c851",
+            "NIST.SP.800-63B-4|24|ef5f02a63f1d",
+            "NIST.SP.800-63B-4|24|9b7376bf5419",
+            "NIST.SP.800-63B-4|99|14be749b60d7",
+            "NIST.SP.800-63B-4|97|32725506b9a0"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.14285714285714285,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 16.688957999576814,
+          "latency_ms_all": [
+            45.4,
+            12.9,
+            16.7
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-63B-4|97|7cefa3813507",
+            "NIST.SP.800-63B-4|24|9b7376bf5419",
+            "NIST.SP.800-63B-4|24|ef5f02a63f1d",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|26|e23613b614c8",
+            "NIST.SP.800-63B-4|98|6f53add64f14",
+            "NIST.SP.800-63B-4|98|ac495b876d57",
+            "NIST.SP.800-63B-4|82|8e07f4cdcda0",
+            "NIST.SP.800-63B-4|97|7c9eaca8c851",
+            "NIST.SP.800-63B-4|48|81948695cc42"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5
+          },
+          "latency_ms": 15.426083002239466,
+          "latency_ms_all": [
+            36.9,
+            15.4,
+            14.6
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-63B-4|24|ef5f02a63f1d",
+            "NIST.SP.800-63B-4|26|e23613b614c8",
+            "NIST.SP.800-63B-4|24|9b7376bf5419"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 901.3212920035585,
+          "latency_ms_all": [
+            5943.2,
+            901.3,
+            743.4
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D02",
+        "split": "test",
+        "domain": "technical",
+        "category": "exact",
+        "question": "Which three sanitization methods does SP 800-88 name?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-88r2|3|d0abf95ada5b",
+            "NIST.SP.800-88r2|6|160d274a9e40",
+            "NIST.SP.800-88r2|45|c4200eb18d06",
+            "NIST.SP.800-88r2|10|5a0cc6e234d3",
+            "NIST.SP.800-88r2|16|de33903ee6a0",
+            "NIST.SP.800-88r2|21|472ba4c7129a",
+            "NIST.SP.800-88r2|12|02e8a62c9a8e",
+            "NIST.SP.800-88r2|39|59042fabf3f4",
+            "NIST.SP.800-88r2|26|f79273452952",
+            "NIST.SP.800-88r2|30|458a31f68f0f"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 1.9769999998970889,
+          "latency_ms_all": [
+            3.0,
+            2.0,
+            1.5
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-88r2|45|c4200eb18d06",
+            "NIST.SP.800-88r2|47|fd485ff57cf5",
+            "NIST.SP.800-88r2|2|9b0b7c904829",
+            "NIST.SP.800-88r2|33|84cb404642df",
+            "NIST.SP.800-88r2|8|25ba9f298f7d",
+            "NIST.SP.800-88r2|16|de33903ee6a0",
+            "NIST.SP.800-88r2|31|693939ef69c9",
+            "NIST.SP.800-88r2|31|eec3a12f88aa",
+            "NIST.SP.800-88r2|47|0723d98604b8",
+            "NIST.SP.800-88r2|32|8138042308e4"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 11.372832996130455,
+          "latency_ms_all": [
+            15.2,
+            11.3,
+            11.4
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-88r2|45|c4200eb18d06",
+            "NIST.SP.800-88r2|16|de33903ee6a0",
+            "NIST.SP.800-88r2|34|a7f6f10776d7",
+            "NIST.SP.800-88r2|47|0723d98604b8",
+            "NIST.SP.800-88r2|3|d0abf95ada5b",
+            "NIST.SP.800-88r2|26|f79273452952",
+            "NIST.SP.800-88r2|0|40d827b16f47",
+            "NIST.SP.800-88r2|30|458a31f68f0f",
+            "NIST.SP.800-88r2|32|8138042308e4",
+            "NIST.SP.800-88r2|4|40d984781fbf"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 14.176541997585446,
+          "latency_ms_all": [
+            14.6,
+            14.2,
+            14.1
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-88r2|34|a7f6f10776d7",
+            "NIST.SP.800-88r2|26|f79273452952",
+            "NIST.SP.800-88r2|16|de33903ee6a0"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 931.4827080015675,
+          "latency_ms_all": [
+            6130.1,
+            931.5,
+            786.5
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D03",
+        "split": "test",
+        "domain": "technical",
+        "category": "exact",
+        "question": "Which NIST Cybersecurity Framework 2.0 functions are involved in incident response?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-61r3|10|d854dcc912e3",
+            "NIST.SP.800-61r3|4|302d87e4c2bc",
+            "NIST.SP.800-61r3|8|128ab96f191c",
+            "NIST.SP.800-61r3|8|4f878d9cc352",
+            "NIST.SP.800-61r3|13|ad25d188592d",
+            "NIST.SP.800-61r3|8|687d213afa1d",
+            "NIST.SP.800-61r3|8|46657985d831",
+            "NIST.SP.800-61r3|12|db0d55b216c8",
+            "NIST.SP.800-61r3|13|839e4dd68a73",
+            "NIST.SP.800-61r3|12|95055a0b15f4"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.3333333333333333,
+            "mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 2.413624999462627,
+          "latency_ms_all": [
+            4.1,
+            2.4,
+            2.1
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-61r3|8|128ab96f191c",
+            "NIST.SP.800-61r3|10|d854dcc912e3",
+            "NIST.SP.800-61r3|12|95055a0b15f4",
+            "NIST.SP.800-61r3|4|302d87e4c2bc",
+            "NIST.SP.800-61r3|12|db0d55b216c8",
+            "NIST.SP.800-61r3|14|2409d28bdbdc",
+            "NIST.SP.800-61r3|5|9c37f000b849",
+            "NIST.SP.800-61r3|13|ad25d188592d",
+            "NIST.SP.800-61r3|10|f089238cdc1d",
+            "NIST.SP.800-61r3|8|46657985d831"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 11.950082996918354,
+          "latency_ms_all": [
+            12.9,
+            12.0,
+            9.8
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-61r3|10|d854dcc912e3",
+            "NIST.SP.800-61r3|8|128ab96f191c",
+            "NIST.SP.800-61r3|4|302d87e4c2bc",
+            "NIST.SP.800-61r3|12|95055a0b15f4",
+            "NIST.SP.800-61r3|12|db0d55b216c8",
+            "NIST.SP.800-61r3|13|ad25d188592d",
+            "NIST.SP.800-61r3|8|46657985d831",
+            "NIST.SP.800-61r3|5|9c37f000b849",
+            "NIST.SP.800-61r3|8|4f878d9cc352",
+            "NIST.SP.800-61r3|8|687d213afa1d"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5
+          },
+          "latency_ms": 13.31979200040223,
+          "latency_ms_all": [
+            15.1,
+            12.4,
+            13.3
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-61r3|4|302d87e4c2bc",
+            "NIST.SP.800-61r3|12|db0d55b216c8",
+            "NIST.SP.800-61r3|8|128ab96f191c"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 1099.5513329980895,
+          "latency_ms_all": [
+            6290.1,
+            1099.6,
+            772.3
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D04",
+        "split": "test",
+        "domain": "technical",
+        "category": "exact",
+        "question": "Which vulnerability risk response scenarios should a patch management plan cover?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-40r4|6|db0986bb808d",
+            "NIST.SP.800-40r4|18|0ceed093c864",
+            "NIST.SP.800-40r4|17|27c816f14593",
+            "NIST.SP.800-40r4|11|01d7383800aa",
+            "NIST.SP.800-40r4|10|f8eeb5ddcfce",
+            "NIST.SP.800-40r4|22|20f58ef8a106",
+            "NIST.SP.800-40r4|20|c8c5db1371cc",
+            "NIST.SP.800-40r4|10|4a751a19ab4d",
+            "NIST.SP.800-40r4|9|9a1a3ff48b82",
+            "NIST.SP.800-40r4|11|283fb78524c6"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.25,
+            "span_recall@5": 0.25,
+            "span_recall@10": 0.25,
+            "mrr@10": 0.3333333333333333,
+            "mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 3.6440420008148067,
+          "latency_ms_all": [
+            4.9,
+            3.2,
+            3.6
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-40r4|9|9a1a3ff48b82",
+            "NIST.SP.800-40r4|17|27c816f14593",
+            "NIST.SP.800-40r4|10|4a751a19ab4d",
+            "NIST.SP.800-40r4|14|985d834d68a2",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|11|01d7383800aa",
+            "NIST.SP.800-40r4|8|5c1bc05f28d3",
+            "NIST.SP.800-40r4|23|c7e5741fee95",
+            "NIST.SP.800-40r4|15|6222a98dc751",
+            "NIST.SP.800-40r4|5|e3c57e80f4e3"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.25,
+            "span_recall@5": 0.75,
+            "span_recall@10": 0.75,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5
+          },
+          "latency_ms": 14.266291000240017,
+          "latency_ms_all": [
+            18.9,
+            14.3,
+            11.8
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-40r4|17|27c816f14593",
+            "NIST.SP.800-40r4|9|9a1a3ff48b82",
+            "NIST.SP.800-40r4|11|01d7383800aa",
+            "NIST.SP.800-40r4|10|4a751a19ab4d",
+            "NIST.SP.800-40r4|10|f8eeb5ddcfce",
+            "NIST.SP.800-40r4|22|20f58ef8a106",
+            "NIST.SP.800-40r4|21|3d68ebbf7f09",
+            "NIST.SP.800-40r4|22|1dbfe9d72bbd",
+            "NIST.SP.800-40r4|3|416416287fa0",
+            "NIST.SP.800-40r4|15|36751a9b024e"
+          ],
+          "metrics": {
+            "span_recall@1": 0.25,
+            "span_recall@3": 0.25,
+            "span_recall@5": 0.25,
+            "span_recall@10": 0.25,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 17.59166600095341,
+          "latency_ms_all": [
+            17.6,
+            18.2,
+            16.3
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-40r4|11|01d7383800aa",
+            "NIST.SP.800-40r4|10|f8eeb5ddcfce",
+            "NIST.SP.800-40r4|9|9a1a3ff48b82"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 1732.8269589997944,
+          "latency_ms_all": [
+            6670.0,
+            1732.8,
+            849.3
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D05",
+        "split": "test",
+        "domain": "technical",
+        "category": "exact",
+        "question": "Can a syncable authenticator be used at authentication assurance level 3?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-63B-4|104|a1b10d67833e",
+            "NIST.SP.800-63B-4|6|b64fcafb6bca",
+            "NIST.SP.800-63B-4|12|43e5e0e0f6ac",
+            "NIST.SP.800-63B-4|6|a8c75786951f",
+            "NIST.SP.800-63B-4|106|48aba9b23f10",
+            "NIST.SP.800-63B-4|18|dd3f1adb9183",
+            "NIST.SP.800-63B-4|12|77ebf9abfe86",
+            "NIST.SP.800-63B-4|37|487b64df9686",
+            "NIST.SP.800-63B-4|56|71e6e325a95e",
+            "NIST.SP.800-63B-4|19|e56f727bbe39"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.1,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 4.762040996865835,
+          "latency_ms_all": [
+            12.8,
+            4.8,
+            4.8
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-63B-4|37|487b64df9686",
+            "NIST.SP.800-63B-4|102|41bda4ffab4e",
+            "NIST.SP.800-63B-4|101|d844333bfe93",
+            "NIST.SP.800-63B-4|106|48aba9b23f10",
+            "NIST.SP.800-63B-4|105|33edca19e569",
+            "NIST.SP.800-63B-4|39|846b49b05d50",
+            "NIST.SP.800-63B-4|19|e56f727bbe39",
+            "NIST.SP.800-63B-4|12|77ebf9abfe86",
+            "NIST.SP.800-63B-4|103|0e3f3991fd6a",
+            "NIST.SP.800-63B-4|105|cfe6fc8cf29c"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.14285714285714285,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 11.254625002038665,
+          "latency_ms_all": [
+            308.0,
+            10.6,
+            11.3
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-63B-4|37|487b64df9686",
+            "NIST.SP.800-63B-4|106|48aba9b23f10",
+            "NIST.SP.800-63B-4|12|77ebf9abfe86",
+            "NIST.SP.800-63B-4|6|a8c75786951f",
+            "NIST.SP.800-63B-4|18|dd3f1adb9183",
+            "NIST.SP.800-63B-4|19|e56f727bbe39",
+            "NIST.SP.800-63B-4|12|43e5e0e0f6ac",
+            "NIST.SP.800-63B-4|102|41bda4ffab4e",
+            "NIST.SP.800-63B-4|105|33edca19e569",
+            "NIST.SP.800-63B-4|103|0e3f3991fd6a"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.16666666666666666,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 13.19554200017592,
+          "latency_ms_all": [
+            14.7,
+            13.0,
+            13.2
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-63B-4|12|77ebf9abfe86",
+            "NIST.SP.800-63B-4|19|e56f727bbe39",
+            "NIST.SP.800-63B-4|18|dd3f1adb9183"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "mrr@3": 0.5
+          },
+          "latency_ms": 535.413666999375,
+          "latency_ms_all": [
+            7739.1,
+            535.4,
+            368.7
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D06",
+        "split": "test",
+        "domain": "technical",
+        "category": "paraphrase",
+        "question": "Do services have to make users change their passwords on a regular schedule?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-63B-4|82|8e07f4cdcda0",
+            "NIST.SP.800-63B-4|98|112d589123dc",
+            "NIST.SP.800-63B-4|98|ac495b876d57",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|97|db1099491dca",
+            "NIST.SP.800-63B-4|98|6f53add64f14",
+            "NIST.SP.800-63B-4|24|65be4a057942",
+            "NIST.SP.800-63B-4|82|aeacf1c5c2bb",
+            "NIST.SP.800-63B-4|104|8775cc5b51d8",
+            "NIST.SP.800-63B-4|82|36971216fade"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.14285714285714285,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 4.976750002242625,
+          "latency_ms_all": [
+            8.9,
+            5.0,
+            2.9
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-63B-4|24|65be4a057942",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|82|8e07f4cdcda0",
+            "NIST.SP.800-63B-4|82|36971216fade",
+            "NIST.SP.800-63B-4|25|bf125890cd80",
+            "NIST.SP.800-63B-4|25|a06ec57d8377",
+            "NIST.SP.800-63B-4|24|ef5f02a63f1d",
+            "NIST.SP.800-63B-4|97|32725506b9a0",
+            "NIST.SP.800-63B-4|108|f1533dfbf961",
+            "NIST.SP.800-63B-4|26|4d423a206f08"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 12.707499998214189,
+          "latency_ms_all": [
+            16.2,
+            12.7,
+            12.6
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-63B-4|82|8e07f4cdcda0",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|24|65be4a057942",
+            "NIST.SP.800-63B-4|98|6f53add64f14",
+            "NIST.SP.800-63B-4|82|36971216fade",
+            "NIST.SP.800-63B-4|98|112d589123dc",
+            "NIST.SP.800-63B-4|97|db1099491dca",
+            "NIST.SP.800-63B-4|98|ac495b876d57",
+            "NIST.SP.800-63B-4|25|a06ec57d8377",
+            "NIST.SP.800-63B-4|104|8775cc5b51d8"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.3333333333333333,
+            "mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 12.394249999488238,
+          "latency_ms_all": [
+            15.3,
+            12.4,
+            12.1
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-63B-4|24|65be4a057942",
+            "NIST.SP.800-63B-4|82|36971216fade",
+            "NIST.SP.800-63B-4|25|a06ec57d8377"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 1768.1724160065642,
+          "latency_ms_all": [
+            6977.5,
+            1768.2,
+            1709.6
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D07",
+        "split": "dev",
+        "domain": "technical",
+        "category": "paraphrase",
+        "question": "What maximum password length should a service permit, at a minimum?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-63B-4|24|9b7376bf5419",
+            "NIST.SP.800-63B-4|97|7cefa3813507",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|26|e23613b614c8",
+            "NIST.SP.800-63B-4|25|bf125890cd80",
+            "NIST.SP.800-63B-4|26|4d423a206f08",
+            "NIST.SP.800-63B-4|26|8908affe6966",
+            "NIST.SP.800-63B-4|55|46571b2ff367",
+            "NIST.SP.800-63B-4|24|ef5f02a63f1d",
+            "NIST.SP.800-63B-4|54|6edbbcd79878"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 2.525541996874381,
+          "latency_ms_all": [
+            7.6,
+            2.5,
+            2.1
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-63B-4|100|ab6157458170",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|98|ac495b876d57",
+            "NIST.SP.800-63B-4|82|aeacf1c5c2bb",
+            "NIST.SP.800-63B-4|24|ef5f02a63f1d",
+            "NIST.SP.800-63B-4|97|7cefa3813507",
+            "NIST.SP.800-63B-4|24|9b7376bf5419",
+            "NIST.SP.800-63B-4|25|a06ec57d8377",
+            "NIST.SP.800-63B-4|91|11d042f771f0",
+            "NIST.SP.800-63B-4|97|32725506b9a0"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.14285714285714285,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 13.771917001577094,
+          "latency_ms_all": [
+            64.1,
+            13.8,
+            12.7
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|24|9b7376bf5419",
+            "NIST.SP.800-63B-4|97|7cefa3813507",
+            "NIST.SP.800-63B-4|24|ef5f02a63f1d",
+            "NIST.SP.800-63B-4|25|a06ec57d8377",
+            "NIST.SP.800-63B-4|82|aeacf1c5c2bb",
+            "NIST.SP.800-63B-4|98|ac495b876d57",
+            "NIST.SP.800-63B-4|26|e23613b614c8",
+            "NIST.SP.800-63B-4|98|6f53add64f14",
+            "NIST.SP.800-63B-4|82|8e07f4cdcda0"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5
+          },
+          "latency_ms": 17.061207996448502,
+          "latency_ms_all": [
+            19.1,
+            17.1,
+            16.6
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-63B-4|97|7cefa3813507",
+            "NIST.SP.800-63B-4|24|9b7376bf5419",
+            "NIST.SP.800-63B-4|25|a06ec57d8377"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "mrr@3": 0.5
+          },
+          "latency_ms": 1544.4731249954202,
+          "latency_ms_all": [
+            7246.0,
+            953.1,
+            1544.5
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D08",
+        "split": "test",
+        "domain": "technical",
+        "category": "paraphrase",
+        "question": "What happens when a user picks a password that appears on a list of leaked credentials?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-63B-4|83|65cb0caeff6a",
+            "NIST.SP.800-63B-4|78|f3fa0d2eab2f",
+            "NIST.SP.800-63B-4|98|ac495b876d57",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|18|3966f09892ad",
+            "NIST.SP.800-63B-4|82|36971216fade",
+            "NIST.SP.800-63B-4|97|7c9eaca8c851",
+            "NIST.SP.800-63B-4|25|a06ec57d8377",
+            "NIST.SP.800-63B-4|82|aeacf1c5c2bb",
+            "NIST.SP.800-88r2|29|c1205edc79e0"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 2.5385410044691525,
+          "latency_ms_all": [
+            4.4,
+            2.3,
+            2.5
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-63B-4|68|25e8a050fe40",
+            "NIST.SP.800-63B-4|120|0902054a55dd",
+            "NIST.SP.800-63B-4|25|a06ec57d8377",
+            "NIST.SP.800-63B-4|69|729ccfd39a05",
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|27|f83b55a6f654",
+            "NIST.SP.800-63B-4|68|fa37b499180c",
+            "NIST.SP.800-63B-4|68|fd78ac131eb4",
+            "NIST.SP.800-63B-4|60|4126f73d4392",
+            "NIST.SP.800-63B-4|69|5cf7ec4c3cb0"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 19.364457999472506,
+          "latency_ms_all": [
+            62.5,
+            19.4,
+            16.6
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-63B-4|98|39c5bbf18325",
+            "NIST.SP.800-63B-4|25|a06ec57d8377",
+            "NIST.SP.800-63B-4|83|65cb0caeff6a",
+            "NIST.SP.800-63B-4|82|36971216fade",
+            "NIST.SP.800-63B-4|25|bf125890cd80",
+            "NIST.SP.800-63B-4|82|8e07f4cdcda0",
+            "NIST.SP.800-63B-4|68|25e8a050fe40",
+            "NIST.SP.800-63B-4|120|0902054a55dd",
+            "NIST.SP.800-63B-4|78|f3fa0d2eab2f",
+            "NIST.SP.800-63B-4|98|ac495b876d57"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 19.390084002225194,
+          "latency_ms_all": [
+            20.1,
+            19.4,
+            17.8
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-63B-4|83|65cb0caeff6a",
+            "NIST.SP.800-63B-4|25|bf125890cd80",
+            "NIST.SP.800-63B-4|25|a06ec57d8377"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 932.4633750002249,
+          "latency_ms_all": [
+            7287.8,
+            932.5,
+            776.1
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D09",
+        "split": "dev",
+        "domain": "technical",
+        "category": "paraphrase",
+        "question": "Why does putting off routine updates make emergency fixes harder?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-40r4|17|ba9200e16a2e",
+            "NIST.SP.800-40r4|18|82a2bf4ca378",
+            "NIST.SP.800-40r4|21|a1ae0510686d",
+            "NIST.SP.800-40r4|17|27c816f14593",
+            "NIST.SP.800-40r4|24|248e18caa682",
+            "NIST.SP.800-40r4|21|359a60480e61",
+            "NIST.SP.800-40r4|6|ab5148bec492",
+            "NIST.SP.800-40r4|21|3d68ebbf7f09",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|22|20f58ef8a106"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 3.407583004445769,
+          "latency_ms_all": [
+            6.4,
+            3.4,
+            2.9
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-40r4|17|ba9200e16a2e",
+            "NIST.SP.800-40r4|21|a1ae0510686d",
+            "NIST.SP.800-40r4|21|359a60480e61",
+            "NIST.SP.800-40r4|18|82a2bf4ca378",
+            "NIST.SP.800-40r4|9|c1eab784326c",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|9|11ee38848f16",
+            "NIST.SP.800-40r4|14|086aced0a605",
+            "NIST.SP.800-40r4|14|9f83bd5ba93b",
+            "NIST.SP.800-40r4|17|27c816f14593"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 16.84820800437592,
+          "latency_ms_all": [
+            19.2,
+            16.2,
+            16.8
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-40r4|17|ba9200e16a2e",
+            "NIST.SP.800-40r4|21|a1ae0510686d",
+            "NIST.SP.800-40r4|18|82a2bf4ca378",
+            "NIST.SP.800-40r4|21|359a60480e61",
+            "NIST.SP.800-40r4|17|27c816f14593",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|21|3d68ebbf7f09",
+            "NIST.SP.800-40r4|22|20f58ef8a106",
+            "NIST.SP.800-40r4|24|248e18caa682",
+            "NIST.SP.800-40r4|15|44b6be004409"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 23.538916997495107,
+          "latency_ms_all": [
+            20.6,
+            24.0,
+            23.5
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-40r4|18|82a2bf4ca378",
+            "NIST.SP.800-40r4|21|a1ae0510686d",
+            "NIST.SP.800-40r4|18|2c5399c12b8a"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 656.8648329994176,
+          "latency_ms_all": [
+            7509.7,
+            656.9,
+            358.6
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D10",
+        "split": "test",
+        "domain": "technical",
+        "category": "paraphrase",
+        "question": "How should a storage device be sanitized when it will never be used again?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-88r2|22|95b3b45d81a3",
+            "NIST.SP.800-88r2|29|c1205edc79e0",
+            "NIST.SP.800-88r2|22|d2a2ba723727",
+            "NIST.SP.800-63B-4|95|1a48b0c1803f",
+            "NIST.SP.800-88r2|14|09618863fe93",
+            "NIST.SP.800-88r2|26|f6c1751005f7",
+            "NIST.SP.800-88r2|17|c98c8814d41a",
+            "NIST.SP.800-88r2|18|0050a0578c75",
+            "NIST.SP.800-88r2|24|27245d2a04c9",
+            "NIST.SP.800-88r2|12|fcf75e82eb6c"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 1.7004170003929175,
+          "latency_ms_all": [
+            2.9,
+            1.7,
+            1.5
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-88r2|19|29d932d90c68",
+            "NIST.SP.800-88r2|42|a09e9499afea",
+            "NIST.SP.800-88r2|40|be686ae130e3",
+            "NIST.SP.800-88r2|40|3aef9631e86c",
+            "NIST.SP.800-88r2|17|37eb27cecf3e",
+            "NIST.SP.800-88r2|14|d47fa1a7738b",
+            "NIST.SP.800-88r2|18|37d1b49d3526",
+            "NIST.SP.800-88r2|42|c80501d1109b",
+            "NIST.SP.800-88r2|18|0c4a15b6dfc6",
+            "NIST.SP.800-88r2|17|ac21765930fe"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 11.264834000030532,
+          "latency_ms_all": [
+            11.3,
+            10.2,
+            11.8
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-88r2|19|29d932d90c68",
+            "NIST.SP.800-88r2|40|be686ae130e3",
+            "NIST.SP.800-88r2|26|f79273452952",
+            "NIST.SP.800-88r2|43|a712c01f314b",
+            "NIST.SP.800-88r2|18|0050a0578c75",
+            "NIST.SP.800-88r2|42|a09e9499afea",
+            "NIST.SP.800-88r2|17|c98c8814d41a",
+            "NIST.SP.800-88r2|18|0c4a15b6dfc6",
+            "NIST.SP.800-88r2|41|e6de89f34a1f",
+            "NIST.SP.800-88r2|42|c80501d1109b"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 13.54400000127498,
+          "latency_ms_all": [
+            13.5,
+            13.0,
+            14.5
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-88r2|26|f79273452952",
+            "NIST.SP.800-88r2|18|0050a0578c75",
+            "NIST.SP.800-88r2|19|29d932d90c68"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 1009.186374998535,
+          "latency_ms_all": [
+            9852.8,
+            1009.2,
+            398.7
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D11",
+        "split": "test",
+        "domain": "technical",
+        "category": "multi_doc",
+        "question": "How do the patch management guide and the incident response guide each mention ransomware?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-40r4|8|b0d57e5ff988",
+            "NIST.SP.800-40r4|11|283fb78524c6",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-61r3|10|f089238cdc1d",
+            "NIST.SP.800-40r4|0|c1843623748d",
+            "NIST.SP.800-61r3|44|0d26d60a2390",
+            "NIST.SP.800-40r4|6|c2d2b55aacf4",
+            "NIST.SP.800-40r4|14|9f83bd5ba93b",
+            "NIST.SP.800-40r4|20|c8c5db1371cc",
+            "NIST.SP.800-40r4|26|f37668d05f08"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.5,
+            "mrr@10": 0.125,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 2.9591249985969625,
+          "latency_ms_all": [
+            6.4,
+            3.0,
+            3.0
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-40r4|8|5c1bc05f28d3",
+            "NIST.SP.800-40r4|11|01d7383800aa",
+            "NIST.SP.800-40r4|9|9a1a3ff48b82",
+            "NIST.SP.800-40r4|10|4a751a19ab4d",
+            "NIST.SP.800-40r4|17|27c816f14593",
+            "NIST.SP.800-40r4|24|248e18caa682",
+            "NIST.SP.800-40r4|24|737dd3b541a2",
+            "NIST.SP.800-61r3|10|d3c40be52a0d",
+            "NIST.SP.800-61r3|42|f1121527a7f0",
+            "NIST.SP.800-40r4|11|86c4ec6876d4"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 13.130124993040226,
+          "latency_ms_all": [
+            15.1,
+            13.1,
+            12.9
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-40r4|8|b0d57e5ff988",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|9|9a1a3ff48b82",
+            "NIST.SP.800-40r4|0|c1843623748d",
+            "NIST.SP.800-40r4|24|248e18caa682",
+            "NIST.SP.800-61r3|9|94ca3bf1ef0c",
+            "NIST.SP.800-40r4|7|f91474975cb8",
+            "NIST.SP.800-40r4|14|9f83bd5ba93b",
+            "NIST.SP.800-40r4|26|f37668d05f08",
+            "NIST.SP.800-40r4|15|6222a98dc751"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.16666666666666666,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 16.97345799766481,
+          "latency_ms_all": [
+            17.0,
+            16.5,
+            17.2
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-40r4|9|9a1a3ff48b82",
+            "NIST.SP.800-40r4|24|248e18caa682",
+            "NIST.SP.800-40r4|18|2c5399c12b8a"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 1569.4489999950747,
+          "latency_ms_all": [
+            10466.0,
+            1569.4,
+            1109.7
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D12",
+        "split": "dev",
+        "domain": "technical",
+        "category": "multi_doc",
+        "question": "What do the patch management guide and the incident response guide each say about keeping asset inventories?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-40r4|18|0ceed093c864",
+            "NIST.SP.800-40r4|16|d45260ff8606",
+            "NIST.SP.800-40r4|11|283fb78524c6",
+            "NIST.SP.800-40r4|8|b0d57e5ff988",
+            "NIST.SP.800-40r4|12|d6346ac97acb",
+            "NIST.SP.800-40r4|20|c8c5db1371cc",
+            "NIST.SP.800-61r3|22|efb5fb6dcfe1",
+            "NIST.SP.800-40r4|17|d270be8b3e0a",
+            "NIST.SP.800-61r3|34|3bfa63758d7d",
+            "NIST.SP.800-40r4|16|0dc1b7b1f714"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.5,
+            "mrr@10": 0.14285714285714285,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 18.169958995713387,
+          "latency_ms_all": [
+            14.6,
+            18.2,
+            20.0
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-40r4|22|f4375fbebf7a",
+            "NIST.SP.800-40r4|0|c1843623748d",
+            "NIST.SP.800-40r4|8|b0d57e5ff988",
+            "NIST.SP.800-40r4|21|359a60480e61",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|21|3d68ebbf7f09",
+            "NIST.SP.800-40r4|17|27c816f14593",
+            "NIST.SP.800-40r4|15|6222a98dc751",
+            "NIST.SP.800-40r4|1|9a37d0cbb940",
+            "NIST.SP.800-40r4|16|0dc1b7b1f714"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 54.55208300554659,
+          "latency_ms_all": [
+            118.0,
+            54.6,
+            35.9
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-40r4|8|b0d57e5ff988",
+            "NIST.SP.800-40r4|0|c1843623748d",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|12|d6346ac97acb",
+            "NIST.SP.800-40r4|16|0dc1b7b1f714",
+            "NIST.SP.800-40r4|18|0ceed093c864",
+            "NIST.SP.800-40r4|6|c2d2b55aacf4",
+            "NIST.SP.800-40r4|15|6222a98dc751",
+            "NIST.SP.800-40r4|17|d270be8b3e0a",
+            "NIST.SP.800-40r4|6|ab5148bec492"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 57.17358300171327,
+          "latency_ms_all": [
+            75.8,
+            57.2,
+            49.5
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|26|f37668d05f08",
+            "NIST.SP.800-40r4|16|0dc1b7b1f714"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 740.5204170063371,
+          "latency_ms_all": [
+            8472.0,
+            740.5,
+            435.3
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D13",
+        "split": "test",
+        "domain": "technical",
+        "category": "multi_doc",
+        "question": "How is supply chain risk addressed in the patch management guide and in the incident response guide?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-40r4|26|f37668d05f08",
+            "NIST.SP.800-61r3|22|cf2c6d8bfbef",
+            "NIST.SP.800-61r3|21|3c2ca14dfe25",
+            "NIST.SP.800-61r3|21|3b40699f3190",
+            "NIST.SP.800-40r4|11|283fb78524c6",
+            "NIST.SP.800-61r3|22|2c3e88265f45",
+            "NIST.SP.800-61r3|10|f089238cdc1d",
+            "NIST.SP.800-40r4|8|b0d57e5ff988",
+            "NIST.SP.800-40r4|6|c2d2b55aacf4",
+            "NIST.SP.800-40r4|9|9a1a3ff48b82"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.5,
+            "span_recall@5": 0.5,
+            "span_recall@10": 0.5,
+            "mrr@10": 0.3333333333333333,
+            "mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 3.3153339973068796,
+          "latency_ms_all": [
+            5.5,
+            3.3,
+            2.8
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-40r4|17|27c816f14593",
+            "NIST.SP.800-40r4|9|9a1a3ff48b82",
+            "NIST.SP.800-40r4|15|6222a98dc751",
+            "NIST.SP.800-40r4|8|5c1bc05f28d3",
+            "NIST.SP.800-40r4|14|985d834d68a2",
+            "NIST.SP.800-40r4|26|f355067c6903",
+            "NIST.SP.800-40r4|5|e3c57e80f4e3",
+            "NIST.SP.800-40r4|11|01d7383800aa",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|7|f91474975cb8"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 15.880500002822373,
+          "latency_ms_all": [
+            14.9,
+            15.9,
+            19.1
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-61r3|22|2c3e88265f45",
+            "NIST.SP.800-40r4|9|9a1a3ff48b82",
+            "NIST.SP.800-40r4|15|6222a98dc751",
+            "NIST.SP.800-61r3|21|3c2ca14dfe25",
+            "NIST.SP.800-40r4|26|f37668d05f08",
+            "NIST.SP.800-61r3|22|cf2c6d8bfbef",
+            "NIST.SP.800-40r4|7|f91474975cb8",
+            "NIST.SP.800-40r4|18|2c5399c12b8a",
+            "NIST.SP.800-40r4|26|f355067c6903",
+            "NIST.SP.800-40r4|8|b0d57e5ff988"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.5,
+            "span_recall@10": 0.5,
+            "mrr@10": 0.25,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 20.508291003352497,
+          "latency_ms_all": [
+            20.5,
+            20.8,
+            18.6
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-40r4|15|6222a98dc751",
+            "NIST.SP.800-40r4|7|f91474975cb8",
+            "NIST.SP.800-40r4|18|2c5399c12b8a"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 1785.5720829975326,
+          "latency_ms_all": [
+            10889.0,
+            1241.6,
+            1785.6
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D17",
+        "split": "test",
+        "domain": "technical",
+        "category": "exact",
+        "question": "What does ISM stand for in the media sanitization guidelines?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-88r2|9|1259890b96e8",
+            "NIST.SP.800-88r2|34|a7f6f10776d7",
+            "NIST.SP.800-88r2|15|6de7d4b3bb3c",
+            "NIST.SP.800-88r2|13|2765ba6e4bc1",
+            "NIST.SP.800-88r2|30|19b400f3b038",
+            "NIST.SP.800-88r2|33|fc58189bff2d",
+            "NIST.SP.800-88r2|28|ccdf2e3218b1",
+            "NIST.SP.800-88r2|46|c290c9d12fc7",
+            "NIST.SP.800-88r2|27|ddcff7e6ddc9",
+            "NIST.SP.800-88r2|19|29d932d90c68"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 3.818666998995468,
+          "latency_ms_all": [
+            7.9,
+            3.8,
+            3.4
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-88r2|34|68b9685ebefe",
+            "NIST.SP.800-88r2|30|19b400f3b038",
+            "NIST.SP.800-88r2|10|b9d43601d5d9",
+            "NIST.SP.800-88r2|9|8bb2d5d5eb66",
+            "NIST.SP.800-88r2|32|7984dc47e0ce",
+            "NIST.SP.800-88r2|15|494b72f0e676",
+            "NIST.SP.800-88r2|28|757544fb0eeb",
+            "NIST.SP.800-88r2|13|1b95a54963d1",
+            "NIST.SP.800-88r2|9|1259890b96e8",
+            "NIST.SP.800-88r2|15|6de7d4b3bb3c"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.1111111111111111,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 27.853999999933876,
+          "latency_ms_all": [
+            117.5,
+            23.8,
+            27.9
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-88r2|30|19b400f3b038",
+            "NIST.SP.800-88r2|9|1259890b96e8",
+            "NIST.SP.800-88r2|34|68b9685ebefe",
+            "NIST.SP.800-88r2|15|6de7d4b3bb3c",
+            "NIST.SP.800-88r2|10|b9d43601d5d9",
+            "NIST.SP.800-88r2|32|7984dc47e0ce",
+            "NIST.SP.800-88r2|33|fc58189bff2d",
+            "NIST.SP.800-88r2|15|494b72f0e676",
+            "NIST.SP.800-88r2|13|2765ba6e4bc1",
+            "NIST.SP.800-88r2|34|a7f6f10776d7"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5
+          },
+          "latency_ms": 37.90587500407128,
+          "latency_ms_all": [
+            45.0,
+            37.9,
+            30.6
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-88r2|9|1259890b96e8",
+            "NIST.SP.800-88r2|32|7984dc47e0ce",
+            "NIST.SP.800-88r2|10|b9d43601d5d9"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 1471.3365419956972,
+          "latency_ms_all": [
+            11480.4,
+            1471.3,
+            1219.4
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "D18",
+        "split": "test",
+        "domain": "technical",
+        "category": "paraphrase",
+        "question": "Is the clear method suitable for paper records?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "NIST.SP.800-88r2|16|6cf599b4f8a8",
+            "NIST.SP.800-88r2|18|37d1b49d3526",
+            "NIST.SP.800-88r2|6|160d274a9e40",
+            "NIST.SP.800-61r3|36|b60b7405ef95",
+            "NIST.SP.800-88r2|32|c77b02fd61f1",
+            "NIST.SP.800-88r2|42|a09e9499afea",
+            "NIST.SP.800-63B-4|19|6b6c33f31fd1",
+            "NIST.SP.800-88r2|16|de33903ee6a0",
+            "NIST.SP.800-88r2|41|a1c0607f95f0",
+            "NIST.SP.800-88r2|10|46f341a4f4f7"
+          ],
+          "metrics": {
+            "span_recall@1": 1.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0
+          },
+          "latency_ms": 4.617999999027234,
+          "latency_ms_all": [
+            9.1,
+            4.6,
+            2.4
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "NIST.SP.800-88r2|18|37d1b49d3526",
+            "NIST.SP.800-88r2|41|a1c0607f95f0",
+            "NIST.SP.800-88r2|44|cfa5f2da36a2",
+            "NIST.SP.800-88r2|33|d0bc17b3a29f",
+            "NIST.SP.800-88r2|10|46f341a4f4f7",
+            "NIST.SP.800-88r2|16|6cf599b4f8a8",
+            "NIST.SP.800-88r2|18|0050a0578c75",
+            "NIST.SP.800-88r2|17|ac21765930fe",
+            "NIST.SP.800-88r2|46|f77bb272c615",
+            "NIST.SP.800-88r2|40|be686ae130e3"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 0.0,
+            "span_recall@5": 0.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.16666666666666666,
+            "mrr@3": 0.0
+          },
+          "latency_ms": 28.593791997991502,
+          "latency_ms_all": [
+            100.6,
+            27.1,
+            28.6
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "NIST.SP.800-88r2|18|37d1b49d3526",
+            "NIST.SP.800-88r2|16|6cf599b4f8a8",
+            "NIST.SP.800-88r2|41|a1c0607f95f0",
+            "NIST.SP.800-88r2|10|46f341a4f4f7",
+            "NIST.SP.800-88r2|46|f77bb272c615",
+            "NIST.SP.800-88r2|44|cfa5f2da36a2",
+            "NIST.SP.800-88r2|34|a7f6f10776d7",
+            "NIST.SP.800-88r2|33|84cb404642df",
+            "NIST.SP.800-88r2|16|de33903ee6a0",
+            "NIST.SP.800-88r2|40|be686ae130e3"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "span_recall@5": 1.0,
+            "span_recall@10": 1.0,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5
+          },
+          "latency_ms": 31.596375003573485,
+          "latency_ms_all": [
+            31.1,
+            31.6,
+            32.2
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "NIST.SP.800-88r2|41|a1c0607f95f0",
+            "NIST.SP.800-88r2|46|f77bb272c615",
+            "NIST.SP.800-88r2|16|6cf599b4f8a8"
+          ],
+          "metrics": {
+            "span_recall@1": 0.0,
+            "span_recall@3": 1.0,
+            "mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 1502.2045000005164,
+          "latency_ms_all": [
+            11140.9,
+            1502.2,
+            1070.4
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V01",
+        "split": "test",
+        "domain": "vehicles",
+        "category": "exact",
+        "question": "What are the combined MPG ratings of the 2024 Toyota Prius models, not counting the Prius Prime?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "2267",
+            "2268",
+            "1996",
+            "1997",
+            "2011",
+            "2014",
+            "2012",
+            "2013",
+            "1132",
+            "1135"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.2,
+            "capped_recall@5": 0.25,
+            "hit@5": 1.0,
+            "precision@10": 0.4,
+            "capped_recall@10": 1.0,
+            "hit@10": 1.0,
+            "mrr@10": 0.2,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.2,
+            "loose_capped_recall@5": 0.2,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.6,
+            "loose_capped_recall@10": 0.75,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 0.2,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 13.179417001083493,
+          "latency_ms_all": [
+            22.3,
+            13.2,
+            9.3
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "2267",
+            "2268",
+            "1132",
+            "2014",
+            "1135",
+            "1996",
+            "2011",
+            "1133",
+            "1997",
+            "2012"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.2,
+            "capped_recall@5": 0.25,
+            "hit@5": 1.0,
+            "precision@10": 0.3,
+            "capped_recall@10": 0.75,
+            "hit@10": 1.0,
+            "mrr@10": 0.25,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.3333333333333333,
+            "loose_capped_recall@3": 0.3333333333333333,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.6,
+            "loose_capped_recall@5": 0.6,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.6,
+            "loose_capped_recall@10": 0.75,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 0.3333333333333333,
+            "loose_mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 229.5500420004828,
+          "latency_ms_all": [
+            440.2,
+            229.6,
+            189.3
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "2267",
+            "2268",
+            "1996",
+            "2014",
+            "1132",
+            "2011",
+            "1997",
+            "1135",
+            "2012",
+            "1133"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.2,
+            "capped_recall@5": 0.25,
+            "hit@5": 1.0,
+            "precision@10": 0.3,
+            "capped_recall@10": 0.75,
+            "hit@10": 1.0,
+            "mrr@10": 0.25,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.4,
+            "loose_capped_recall@5": 0.4,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.6,
+            "loose_capped_recall@10": 0.75,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 0.25,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 218.08695900108432,
+          "latency_ms_all": [
+            234.6,
+            200.2,
+            218.1
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "1996",
+            "2012",
+            "2011"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "mrr@3": 0.5,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_mrr@10": 0.5,
+            "loose_mrr@3": 0.5
+          },
+          "latency_ms": 1604.0524580021156,
+          "latency_ms_all": [
+            8788.5,
+            1604.1,
+            1322.3
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V02",
+        "split": "dev",
+        "domain": "vehicles",
+        "category": "exact",
+        "question": "Which 2024 vehicles use diesel fuel?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "1584",
+            "1604",
+            "1620",
+            "1589",
+            "2190",
+            "1603",
+            "2162",
+            "2167",
+            "2168",
+            "2175"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 1.0,
+            "capped_recall@3": 1.0,
+            "hit@3": 1.0,
+            "precision@5": 1.0,
+            "capped_recall@5": 1.0,
+            "hit@5": 1.0,
+            "precision@10": 1.0,
+            "capped_recall@10": 1.0,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 1.0,
+            "loose_capped_recall@5": 1.0,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 1.0,
+            "loose_capped_recall@10": 1.0,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 2.6665000041248277,
+          "latency_ms_all": [
+            5.2,
+            2.7,
+            2.3
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "592",
+            "370",
+            "2190",
+            "1604",
+            "591",
+            "1002",
+            "1603",
+            "467",
+            "468",
+            "352"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.3333333333333333,
+            "capped_recall@3": 0.3333333333333333,
+            "hit@3": 1.0,
+            "precision@5": 0.4,
+            "capped_recall@5": 0.4,
+            "hit@5": 1.0,
+            "precision@10": 0.3,
+            "capped_recall@10": 0.3,
+            "hit@10": 1.0,
+            "mrr@10": 0.3333333333333333,
+            "mrr@3": 0.3333333333333333,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 1.0,
+            "loose_capped_recall@5": 1.0,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 1.0,
+            "loose_capped_recall@10": 1.0,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 236.2531660037348,
+          "latency_ms_all": [
+            277.5,
+            236.3,
+            218.6
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "1604",
+            "2190",
+            "1584",
+            "1603",
+            "1620",
+            "2168",
+            "2189",
+            "370",
+            "1002",
+            "591"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 1.0,
+            "capped_recall@3": 1.0,
+            "hit@3": 1.0,
+            "precision@5": 1.0,
+            "capped_recall@5": 1.0,
+            "hit@5": 1.0,
+            "precision@10": 0.7,
+            "capped_recall@10": 0.7,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 1.0,
+            "loose_capped_recall@5": 1.0,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 1.0,
+            "loose_capped_recall@10": 1.0,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 188.91558299947064,
+          "latency_ms_all": [
+            202.9,
+            188.9,
+            166.9
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "1584",
+            "1620",
+            "1603"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 1.0,
+            "capped_recall@3": 1.0,
+            "hit@3": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 1416.4436249993742,
+          "latency_ms_all": [
+            8002.5,
+            1416.4,
+            1317.4
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V03",
+        "split": "test",
+        "domain": "vehicles",
+        "category": "semantic",
+        "question": "Which 2024 models are battery-electric vehicles with no gasoline engine?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "2465",
+            "2599",
+            "2598",
+            "1736",
+            "2216",
+            "2238",
+            "2237",
+            "2234",
+            "2233",
+            "784"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 1.0,
+            "capped_recall@3": 1.0,
+            "hit@3": 1.0,
+            "precision@5": 1.0,
+            "capped_recall@5": 1.0,
+            "hit@5": 1.0,
+            "precision@10": 0.9,
+            "capped_recall@10": 0.9,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 1.0,
+            "loose_capped_recall@5": 1.0,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 1.0,
+            "loose_capped_recall@10": 1.0,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 57.33666599553544,
+          "latency_ms_all": [
+            57.3,
+            58.8,
+            27.4
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "788",
+            "2485",
+            "786",
+            "2232",
+            "2484",
+            "2482",
+            "2486",
+            "2231",
+            "1740",
+            "2483"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.3333333333333333,
+            "capped_recall@3": 0.3333333333333333,
+            "hit@3": 1.0,
+            "precision@5": 0.6,
+            "capped_recall@5": 0.6,
+            "hit@5": 1.0,
+            "precision@10": 0.8,
+            "capped_recall@10": 0.8,
+            "hit@10": 1.0,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 1.0,
+            "loose_capped_recall@5": 1.0,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 1.0,
+            "loose_capped_recall@10": 1.0,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 277.5346249982249,
+          "latency_ms_all": [
+            492.4,
+            277.5,
+            262.3
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "788",
+            "2465",
+            "2485",
+            "2599",
+            "786",
+            "2598",
+            "2232",
+            "1736",
+            "2484",
+            "2216"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "precision@5": 0.6,
+            "capped_recall@5": 0.6,
+            "hit@5": 1.0,
+            "precision@10": 0.8,
+            "capped_recall@10": 0.8,
+            "hit@10": 1.0,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 1.0,
+            "loose_capped_recall@5": 1.0,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 1.0,
+            "loose_capped_recall@10": 1.0,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 196.08325000444893,
+          "latency_ms_all": [
+            511.7,
+            196.1,
+            166.7
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "2485",
+            "786",
+            "2599"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 1171.7862079967745,
+          "latency_ms_all": [
+            7538.9,
+            1171.8,
+            1162.4
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V04",
+        "split": "dev",
+        "domain": "vehicles",
+        "category": "semantic",
+        "question": "Which 2024 plug-in hybrids are SUVs?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "2262",
+            "1989",
+            "2263",
+            "2264",
+            "1991",
+            "1990",
+            "1027",
+            "1026",
+            "2257",
+            "2044"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "precision@5": 0.6,
+            "capped_recall@5": 0.6,
+            "hit@5": 1.0,
+            "precision@10": 0.3,
+            "capped_recall@10": 0.3,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.8,
+            "loose_capped_recall@5": 0.8,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.7,
+            "loose_capped_recall@10": 0.7,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 3.882582997903228,
+          "latency_ms_all": [
+            8.5,
+            3.9,
+            2.5
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "2262",
+            "788",
+            "1027",
+            "786",
+            "2485",
+            "2232",
+            "2483",
+            "2484",
+            "2482",
+            "2486"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 0.3333333333333333,
+            "capped_recall@3": 0.3333333333333333,
+            "hit@3": 1.0,
+            "precision@5": 0.2,
+            "capped_recall@5": 0.2,
+            "hit@5": 1.0,
+            "precision@10": 0.1,
+            "capped_recall@10": 0.1,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.4,
+            "loose_capped_recall@5": 0.4,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.2,
+            "loose_capped_recall@10": 0.2,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 174.3356250008219,
+          "latency_ms_all": [
+            209.7,
+            163.8,
+            174.3
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "2262",
+            "1027",
+            "788",
+            "1989",
+            "2263",
+            "786",
+            "2264",
+            "2485",
+            "1991",
+            "2232"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 0.3333333333333333,
+            "capped_recall@3": 0.3333333333333333,
+            "hit@3": 1.0,
+            "precision@5": 0.4,
+            "capped_recall@5": 0.4,
+            "hit@5": 1.0,
+            "precision@10": 0.3,
+            "capped_recall@10": 0.3,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.6,
+            "loose_capped_recall@5": 0.6,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.5,
+            "loose_capped_recall@10": 0.5,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 167.08441599621437,
+          "latency_ms_all": [
+            147.8,
+            169.3,
+            167.1
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "788",
+            "2263",
+            "2264"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "mrr@3": 0.5,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_mrr@10": 0.5,
+            "loose_mrr@3": 0.5
+          },
+          "latency_ms": 2130.161749999388,
+          "latency_ms_all": [
+            9719.1,
+            2130.2,
+            1486.7
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V05",
+        "split": "test",
+        "domain": "vehicles",
+        "category": "semantic",
+        "question": "Which 2024 vehicles run on hydrogen?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "2602",
+            "2604",
+            "2603",
+            "2605",
+            "2049",
+            "2052",
+            "2053",
+            "2051",
+            "2050",
+            "2560"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 1.0,
+            "capped_recall@3": 1.0,
+            "hit@3": 1.0,
+            "precision@5": 0.8,
+            "capped_recall@5": 1.0,
+            "hit@5": 1.0,
+            "precision@10": 0.4,
+            "capped_recall@10": 1.0,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 1.0,
+            "loose_capped_recall@5": 1.0,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.9,
+            "loose_capped_recall@10": 1.0,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 25.59987499989802,
+          "latency_ms_all": [
+            28.7,
+            25.6,
+            10.8
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "1689",
+            "1688",
+            "1695",
+            "1696",
+            "1388",
+            "1387",
+            "1697",
+            "1704",
+            "1703",
+            "1691"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.0,
+            "loose_capped_recall@5": 0.0,
+            "loose_hit@5": 0.0,
+            "loose_precision@10": 0.0,
+            "loose_capped_recall@10": 0.0,
+            "loose_hit@10": 0.0,
+            "loose_mrr@10": 0.0,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 234.87029199895915,
+          "latency_ms_all": [
+            841.1,
+            234.6,
+            234.9
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "1689",
+            "2602",
+            "1688",
+            "2604",
+            "1695",
+            "2603",
+            "1696",
+            "2605",
+            "1388",
+            "2049"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.3333333333333333,
+            "capped_recall@3": 0.3333333333333333,
+            "hit@3": 1.0,
+            "precision@5": 0.4,
+            "capped_recall@5": 0.5,
+            "hit@5": 1.0,
+            "precision@10": 0.4,
+            "capped_recall@10": 1.0,
+            "hit@10": 1.0,
+            "mrr@10": 0.5,
+            "mrr@3": 0.5,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.3333333333333333,
+            "loose_capped_recall@3": 0.3333333333333333,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.4,
+            "loose_capped_recall@5": 0.4,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.5,
+            "loose_capped_recall@10": 0.5555555555555556,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 0.5,
+            "loose_mrr@3": 0.5
+          },
+          "latency_ms": 187.53825000021607,
+          "latency_ms_all": [
+            206.7,
+            187.5,
+            177.7
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "1688",
+            "2602",
+            "2604"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "mrr@3": 0.5,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_mrr@10": 0.5,
+            "loose_mrr@3": 0.5
+          },
+          "latency_ms": 1544.6533330032253,
+          "latency_ms_all": [
+            7256.6,
+            1311.8,
+            1544.7
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V06",
+        "split": "dev",
+        "domain": "vehicles",
+        "category": "semantic",
+        "question": "Which 2024 pickup trucks are small?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "2584",
+            "2585",
+            "2330",
+            "2337",
+            "2333",
+            "2335",
+            "2331",
+            "2342",
+            "2336",
+            "2334"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 1.0,
+            "capped_recall@3": 1.0,
+            "hit@3": 1.0,
+            "precision@5": 1.0,
+            "capped_recall@5": 1.0,
+            "hit@5": 1.0,
+            "precision@10": 1.0,
+            "capped_recall@10": 1.0,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 1.0,
+            "loose_capped_recall@5": 1.0,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 1.0,
+            "loose_capped_recall@10": 1.0,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 3.8538750013685785,
+          "latency_ms_all": [
+            8.4,
+            3.9,
+            2.5
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "956",
+            "950",
+            "2137",
+            "962",
+            "2138",
+            "955",
+            "953",
+            "2565",
+            "951",
+            "2353"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.0,
+            "loose_capped_recall@5": 0.0,
+            "loose_hit@5": 0.0,
+            "loose_precision@10": 0.0,
+            "loose_capped_recall@10": 0.0,
+            "loose_hit@10": 0.0,
+            "loose_mrr@10": 0.0,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 234.62637500051642,
+          "latency_ms_all": [
+            241.4,
+            201.4,
+            234.6
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "2566",
+            "2356",
+            "2351",
+            "956",
+            "2584",
+            "950",
+            "2585",
+            "2137",
+            "2330",
+            "962"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.2,
+            "capped_recall@5": 0.2,
+            "hit@5": 1.0,
+            "precision@10": 0.3,
+            "capped_recall@10": 0.3,
+            "hit@10": 1.0,
+            "mrr@10": 0.2,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.2,
+            "loose_capped_recall@5": 0.2,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.3,
+            "loose_capped_recall@10": 0.3,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 0.2,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 202.58774999820162,
+          "latency_ms_all": [
+            227.1,
+            202.6,
+            168.0
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "950",
+            "2137",
+            "2585"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.3333333333333333,
+            "capped_recall@3": 0.3333333333333333,
+            "hit@3": 1.0,
+            "mrr@3": 0.3333333333333333,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.3333333333333333,
+            "loose_capped_recall@3": 0.3333333333333333,
+            "loose_hit@3": 1.0,
+            "loose_mrr@10": 0.3333333333333333,
+            "loose_mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 1392.7145409979858,
+          "latency_ms_all": [
+            7191.1,
+            1392.7,
+            1308.2
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V07",
+        "split": "dev",
+        "domain": "vehicles",
+        "category": "structured",
+        "question": "How many 2024 vehicles have a combined MPG or MPGe rating above 50?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "1661",
+            "1662",
+            "60",
+            "61",
+            "1680",
+            "1681",
+            "1994",
+            "2560",
+            "2295",
+            "2299"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.2,
+            "capped_recall@5": 0.2,
+            "hit@5": 1.0,
+            "precision@10": 0.2,
+            "capped_recall@10": 0.2,
+            "hit@10": 1.0,
+            "mrr@10": 0.2,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.2,
+            "loose_capped_recall@5": 0.2,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.2,
+            "loose_capped_recall@10": 0.2,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 0.2,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 9.239250000973698,
+          "latency_ms_all": [
+            9.7,
+            9.2,
+            6.6
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "2594",
+            "1722",
+            "2595",
+            "1723",
+            "2485",
+            "1027",
+            "2484",
+            "2262",
+            "2486",
+            "2232"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "precision@5": 0.6,
+            "capped_recall@5": 0.6,
+            "hit@5": 1.0,
+            "precision@10": 0.6,
+            "capped_recall@10": 0.6,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.6,
+            "loose_capped_recall@5": 0.6,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.6,
+            "loose_capped_recall@10": 0.6,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 240.3017499964335,
+          "latency_ms_all": [
+            528.2,
+            240.3,
+            209.2
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "2594",
+            "1661",
+            "2590",
+            "1662",
+            "2591",
+            "60",
+            "530",
+            "61",
+            "2588",
+            "1680"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "precision@5": 0.6,
+            "capped_recall@5": 0.6,
+            "hit@5": 1.0,
+            "precision@10": 0.5,
+            "capped_recall@10": 0.5,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.6,
+            "loose_capped_recall@5": 0.6,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.6,
+            "loose_capped_recall@10": 0.6,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 217.66570799809415,
+          "latency_ms_all": [
+            217.7,
+            267.9,
+            175.8
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "2590",
+            "2591",
+            "2590"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 1656.5553330001421,
+          "latency_ms_all": [
+            7893.5,
+            1656.6,
+            1488.5
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V08",
+        "split": "test",
+        "domain": "vehicles",
+        "category": "structured",
+        "question": "Which 2024 hybrid (not plug-in) has the highest combined MPG?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "1989",
+            "2262",
+            "2264",
+            "2263",
+            "1990",
+            "1991",
+            "1027",
+            "1026",
+            "2044",
+            "2256"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.0,
+            "loose_capped_recall@5": 0.0,
+            "loose_hit@5": 0.0,
+            "loose_precision@10": 0.0,
+            "loose_capped_recall@10": 0.0,
+            "loose_hit@10": 0.0,
+            "loose_mrr@10": 0.0,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 3.1505000006291084,
+          "latency_ms_all": [
+            7.2,
+            3.2,
+            2.8
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "2231",
+            "2227",
+            "2485",
+            "2225",
+            "2224",
+            "2229",
+            "2484",
+            "1740",
+            "528",
+            "2482"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.0,
+            "loose_capped_recall@5": 0.0,
+            "loose_hit@5": 0.0,
+            "loose_precision@10": 0.0,
+            "loose_capped_recall@10": 0.0,
+            "loose_hit@10": 0.0,
+            "loose_mrr@10": 0.0,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 220.55379200173775,
+          "latency_ms_all": [
+            238.7,
+            220.6,
+            196.6
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "1032",
+            "1033",
+            "1034",
+            "1035",
+            "1036",
+            "2047",
+            "1989",
+            "2262",
+            "2264",
+            "2231"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.0,
+            "loose_capped_recall@5": 0.0,
+            "loose_hit@5": 0.0,
+            "loose_precision@10": 0.0,
+            "loose_capped_recall@10": 0.0,
+            "loose_hit@10": 0.0,
+            "loose_mrr@10": 0.0,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 171.75870799837867,
+          "latency_ms_all": [
+            199.6,
+            167.4,
+            171.8
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "1034",
+            "1036",
+            "2047"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_mrr@10": 0.0,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 1667.700458005129,
+          "latency_ms_all": [
+            8345.7,
+            1667.7,
+            1476.6
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V09",
+        "split": "test",
+        "domain": "vehicles",
+        "category": "structured",
+        "question": "What is the average combined MPG of 2024 minivans?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "2560",
+            "2295",
+            "2299",
+            "2290",
+            "2361",
+            "2360",
+            "2313",
+            "2294",
+            "2298",
+            "2321"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_precision@5": 0.0,
+            "loose_capped_recall@5": 0.0,
+            "loose_hit@5": 0.0,
+            "loose_precision@10": 0.0,
+            "loose_capped_recall@10": 0.0,
+            "loose_hit@10": 0.0,
+            "loose_mrr@10": 0.0,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 3.4742080024443567,
+          "latency_ms_all": [
+            7.0,
+            2.3,
+            3.5
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "1025",
+            "2594",
+            "2535",
+            "2523",
+            "2520",
+            "2536",
+            "2527",
+            "1764",
+            "2537",
+            "2595"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.3333333333333333,
+            "loose_capped_recall@3": 0.3333333333333333,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.2,
+            "loose_capped_recall@5": 0.2,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.1,
+            "loose_capped_recall@10": 0.1,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 201.19862499996088,
+          "latency_ms_all": [
+            288.9,
+            201.2,
+            165.4
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "1025",
+            "2560",
+            "2477",
+            "2295",
+            "2476",
+            "2299",
+            "2594",
+            "2290",
+            "2535",
+            "2361"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.3333333333333333,
+            "loose_capped_recall@3": 0.3333333333333333,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.2,
+            "loose_capped_recall@5": 0.2,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.1,
+            "loose_capped_recall@10": 0.1,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 149.63216699834447,
+          "latency_ms_all": [
+            152.1,
+            149.6,
+            148.0
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "2594",
+            "2535",
+            "2523"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.0,
+            "loose_capped_recall@3": 0.0,
+            "loose_hit@3": 0.0,
+            "loose_mrr@10": 0.0,
+            "loose_mrr@3": 0.0
+          },
+          "latency_ms": 1524.9546249979176,
+          "latency_ms_all": [
+            7962.8,
+            1525.0,
+            1251.7
+          ]
+        }
+      }
+    },
+    {
+      "question": {
+        "id": "V10",
+        "split": "test",
+        "domain": "vehicles",
+        "category": "structured",
+        "question": "How many 2024 vehicles have an estimated annual fuel cost below $1,000?",
+        "answerable": true
+      },
+      "configs": {
+        "bm25": {
+          "ranked": [
+            "1112",
+            "1111",
+            "1287",
+            "2560",
+            "2295",
+            "2290",
+            "2299",
+            "2313",
+            "2361",
+            "2360"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "precision@5": 0.0,
+            "capped_recall@5": 0.0,
+            "hit@5": 0.0,
+            "precision@10": 0.0,
+            "capped_recall@10": 0.0,
+            "hit@10": 0.0,
+            "mrr@10": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.3333333333333333,
+            "loose_capped_recall@3": 0.3333333333333333,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.2,
+            "loose_capped_recall@5": 0.2,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.1,
+            "loose_capped_recall@10": 0.1,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 0.3333333333333333,
+            "loose_mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 8.351750002475455,
+          "latency_ms_all": [
+            10.3,
+            8.4,
+            5.6
+          ]
+        },
+        "vector": {
+          "ranked": [
+            "2451",
+            "2588",
+            "2450",
+            "1033",
+            "2589",
+            "1032",
+            "2587",
+            "1034",
+            "2477",
+            "1036"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 1.0,
+            "capped_recall@3": 1.0,
+            "hit@3": 1.0,
+            "precision@5": 0.8,
+            "capped_recall@5": 0.8,
+            "hit@5": 1.0,
+            "precision@10": 0.6,
+            "capped_recall@10": 0.6,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 1.0,
+            "loose_capped_recall@3": 1.0,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.8,
+            "loose_capped_recall@5": 0.8,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.6,
+            "loose_capped_recall@10": 0.6,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 232.72562499914784,
+          "latency_ms_all": [
+            226.5,
+            253.0,
+            232.7
+          ]
+        },
+        "hybrid": {
+          "ranked": [
+            "2450",
+            "2451",
+            "1112",
+            "2588",
+            "1111",
+            "1287",
+            "1033",
+            "2560",
+            "2589",
+            "2295"
+          ],
+          "metrics": {
+            "precision@1": 1.0,
+            "capped_recall@1": 1.0,
+            "hit@1": 1.0,
+            "precision@3": 0.6666666666666666,
+            "capped_recall@3": 0.6666666666666666,
+            "hit@3": 1.0,
+            "precision@5": 0.6,
+            "capped_recall@5": 0.6,
+            "hit@5": 1.0,
+            "precision@10": 0.4,
+            "capped_recall@10": 0.4,
+            "hit@10": 1.0,
+            "mrr@10": 1.0,
+            "mrr@3": 1.0,
+            "loose_precision@1": 1.0,
+            "loose_capped_recall@1": 1.0,
+            "loose_hit@1": 1.0,
+            "loose_precision@3": 0.6666666666666666,
+            "loose_capped_recall@3": 0.6666666666666666,
+            "loose_hit@3": 1.0,
+            "loose_precision@5": 0.6,
+            "loose_capped_recall@5": 0.6,
+            "loose_hit@5": 1.0,
+            "loose_precision@10": 0.5,
+            "loose_capped_recall@10": 0.5,
+            "loose_hit@10": 1.0,
+            "loose_mrr@10": 1.0,
+            "loose_mrr@3": 1.0
+          },
+          "latency_ms": 192.51891599560622,
+          "latency_ms_all": [
+            205.8,
+            192.5,
+            170.5
+          ]
+        },
+        "hybrid_rerank": {
+          "ranked": [
+            "1112",
+            "1111",
+            "1287"
+          ],
+          "metrics": {
+            "precision@1": 0.0,
+            "capped_recall@1": 0.0,
+            "hit@1": 0.0,
+            "precision@3": 0.0,
+            "capped_recall@3": 0.0,
+            "hit@3": 0.0,
+            "mrr@3": 0.0,
+            "loose_precision@1": 0.0,
+            "loose_capped_recall@1": 0.0,
+            "loose_hit@1": 0.0,
+            "loose_precision@3": 0.3333333333333333,
+            "loose_capped_recall@3": 0.3333333333333333,
+            "loose_hit@3": 1.0,
+            "loose_mrr@10": 0.3333333333333333,
+            "loose_mrr@3": 0.3333333333333333
+          },
+          "latency_ms": 1432.1445419991505,
+          "latency_ms_all": [
+            7490.7,
+            1432.1,
+            1209.6
+          ]
+        }
+      }
+    }
+  ]
+}

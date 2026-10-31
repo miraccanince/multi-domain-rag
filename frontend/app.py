@@ -1,5 +1,5 @@
 """
-Streamlit Frontend for RAG Documentation Assistant - Modern UI
+Streamlit Frontend for Multi-Domain RAG - Streamlit UI
 
 A professional web interface featuring:
 - Tabbed navigation (Chat, Analytics, Management)
@@ -14,28 +14,37 @@ Usage:
 
 import streamlit as st
 import requests
+import hashlib
 import json
+import os
 import plotly.express as px
 import plotly.graph_objects as go
 from typing import Dict, List, Any, Optional
 from datetime import datetime
+
+# streamlit-cookies-manager 0.2.0 still decorates a function with st.cache, which
+# current Streamlit versions no longer provide. Map it to st.cache_data before the import.
+if not hasattr(st, "cache"):
+    st.cache = st.cache_data
+
 import streamlit_cookies_manager
+
+from rag.auth import get_secret_key
 
 # Page configuration
 st.set_page_config(
-    page_title="FlexiRAG - Dynamic Multi-Domain RAG Framework",
-    page_icon="📄",
+    page_title="Multi-Domain RAG",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 # API Configuration
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = os.getenv("API_URL", "http://localhost:8000").rstrip("/")
 
 # Initialize cookies manager
 cookies = streamlit_cookies_manager.EncryptedCookieManager(
-    prefix="flexirag_",
-    password="flexirag-secret-key-change-in-production"
+    prefix="rag_",
+    password=hashlib.sha256(b"cookies:" + get_secret_key().encode()).hexdigest()
 )
 
 if not cookies.ready():
@@ -270,6 +279,18 @@ def get_domains() -> List[Dict[str, Any]]:
         return []
 
 
+def cached_notice(info: Dict[str, Any]) -> str:
+    """Text shown when an answer comes from the semantic cache."""
+    similarity = info.get("cache_similarity")
+    text = "Cached response"
+    if similarity is not None:
+        text += f" (similarity {similarity:.2f}"
+        if info.get("cached_query"):
+            text += f", matched question: {info['cached_query']}"
+        text += ")"
+    return text
+
+
 def query_documents_streaming(question: str, domain: str = None, n_results: int = 3):
     """Query documents with streaming response."""
     payload = {
@@ -352,27 +373,41 @@ def get_feedback_stats():
         return None
 
 
+def render_source(number: int, source: Dict[str, Any]):
+    """Show one source in an expander."""
+    with st.expander(f"Source {number}: {source.get('source', 'Unknown')}"):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown(f"**Type:** {source.get('source_type', 'N/A').upper()}")
+            if source.get('source_type') == 'pdf':
+                st.markdown(f"**Page:** {source.get('page', 'N/A')}")
+            else:
+                st.markdown(f"**Row ID:** {source.get('row_id', 'N/A')}")
+
+        with col2:
+            if source.get('source_type') == 'csv':
+                st.markdown(f"**Category:** {source.get('category', 'N/A')}")
+
+        st.markdown("**Preview:**")
+        st.text(source.get('chunk_preview', 'No preview available'))
+
+
 def display_sources(sources: List[Dict[str, Any]]):
-    """Display source documents with metadata."""
-    st.subheader("📄 Sources")
+    """Show the sources the answer cited, then the other retrieved chunks."""
+    cited = [s for s in sources if s.get('cited')]
+    others = [s for s in sources if not s.get('cited')]
 
-    for i, source in enumerate(sources, 1):
-        with st.expander(f"Source {i}: {source.get('source', 'Unknown')}"):
-            col1, col2 = st.columns(2)
+    st.subheader("Sources cited in the answer")
+    if not cited:
+        st.caption("The answer does not cite any retrieved document.")
+    for i, source in enumerate(cited, 1):
+        render_source(i, source)
 
-            with col1:
-                st.markdown(f"**Type:** {source.get('source_type', 'N/A').upper()}")
-                if source.get('source_type') == 'pdf':
-                    st.markdown(f"**Page:** {source.get('page', 'N/A')}")
-                else:
-                    st.markdown(f"**Row ID:** {source.get('row_id', 'N/A')}")
-
-            with col2:
-                if source.get('source_type') == 'csv':
-                    st.markdown(f"**Category:** {source.get('category', 'N/A')}")
-
-            st.markdown("**Preview:**")
-            st.text(source.get('chunk_preview', 'No preview available'))
+    if others:
+        with st.expander(f"Also retrieved, not cited ({len(others)})"):
+            for i, source in enumerate(others, 1):
+                render_source(i, source)
 
 
 # ============================================================================
@@ -398,7 +433,7 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
     col1, col2, col3 = st.columns([2, 1, 1])
 
     with col1:
-        st.markdown("### 💬 Ask a Question")
+        st.markdown("### Ask a Question")
 
     with col2:
         if domains_data:
@@ -416,15 +451,15 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
 
     # Chat History Display
     if st.session_state.chat_history:
-        with st.expander(f"📜 Chat History ({len(st.session_state.chat_history)} messages)", expanded=False):
+        with st.expander(f"Chat History ({len(st.session_state.chat_history)} messages)", expanded=False):
             for i, chat in enumerate(reversed(st.session_state.chat_history)):
                 st.markdown(f'<div class="chat-message user-message"><strong>You ({chat["timestamp"]}):</strong> {chat["question"]}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="chat-message assistant-message"><strong>FlexiRAG:</strong> {chat["answer"][:200]}{"..." if len(chat["answer"]) > 200 else ""}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="chat-message assistant-message"><strong>Assistant:</strong> {chat["answer"][:200]}{"..." if len(chat["answer"]) > 200 else ""}</div>', unsafe_allow_html=True)
                 if i < len(st.session_state.chat_history) - 1:
                     st.divider()
 
     # Example questions
-    with st.expander("💡 Example Questions"):
+    with st.expander("Example Questions"):
         col1, col2, col3 = st.columns(3)
 
         with col1:
@@ -464,11 +499,11 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
     # Query Button & Clear History
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        search_button = st.button("🔍 Search", type="primary", use_container_width=True)
+        search_button = st.button("Search", type="primary", use_container_width=True)
     with col2:
         use_streaming = st.checkbox("Stream", value=True)
     with col3:
-        if st.button("🗑️ Clear Chat", use_container_width=True):
+        if st.button("Clear Chat", use_container_width=True):
             st.session_state.chat_history = []
             st.rerun()
 
@@ -488,7 +523,7 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                 )
 
                 if response:
-                    st.subheader("💡 Answer")
+                    st.subheader("Answer")
 
                     # Create placeholder for streaming text
                     answer_placeholder = st.empty()
@@ -503,7 +538,10 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                                 data = json.loads(line)
 
                                 if data.get("type") == "metadata":
-                                    st.info(f"Retrieved {data['chunks_retrieved']} chunks in {data['search_time']:.2f}s")
+                                    if data.get("cache_hit"):
+                                        st.info(cached_notice(data))
+                                    else:
+                                        st.info(f"Retrieved {data['chunks_retrieved']} chunks in {data['search_time']:.2f}s")
 
                                 elif data.get("type") == "token":
                                     token = data.get("token", "")
@@ -513,7 +551,8 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                                 elif data.get("type") == "done":
                                     sources = data.get("sources", [])
                                     total_time = data.get("total_time", 0)
-                                    st.success(f"✅ Answer generated in {total_time:.2f}s")
+                                    if not data.get("cache_hit"):
+                                        st.success(f"Answer generated in {total_time:.2f}s")
 
                             except json.JSONDecodeError:
                                 continue
@@ -546,7 +585,9 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                 )
 
                 if result:
-                    st.subheader("💡 Answer")
+                    st.subheader("Answer")
+                    if result.get("metadata", {}).get("cache_hit"):
+                        st.info(cached_notice(result["metadata"]))
                     st.markdown(f'<div class="streaming-text">{result["answer"]}</div>', unsafe_allow_html=True)
 
                     # Save to chat history and session state for feedback
@@ -573,7 +614,7 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
         col1, col2, col3 = st.columns([1, 1, 8])
 
         with col1:
-            if st.button("👍 Yes", key="thumbs_up"):
+            if st.button("Yes", key="thumbs_up"):
                 if submit_feedback(
                     st.session_state.last_question,
                     st.session_state.last_answer,
@@ -584,7 +625,7 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
                     st.rerun()
 
         with col2:
-            if st.button("👎 No", key="thumbs_down"):
+            if st.button("No", key="thumbs_down"):
                 if submit_feedback(
                     st.session_state.last_question,
                     st.session_state.last_answer,
@@ -602,27 +643,27 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
 def render_analytics_tab(health: Dict, domains_data: List[Dict]):
     """Render analytics dashboard with charts."""
 
-    st.markdown("### 📊 Analytics Dashboard")
+    st.markdown("### Analytics Dashboard")
 
     # Top metrics in cards
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         total_docs = health.get('documents_indexed', 0)
-        st.metric("📚 Total Documents", f"{total_docs:,}")
+        st.metric("Total Documents", f"{total_docs:,}")
 
     with col2:
         domain_count = len(domains_data)
-        st.metric("🗂️ Active Domains", domain_count)
+        st.metric("Active Domains", domain_count)
 
     with col3:
         cache_size = health.get('cache_size', 0)
-        st.metric("💾 Cache Size", cache_size)
+        st.metric("Cache Size", cache_size)
 
     with col4:
         status = health.get('status', 'unknown')
-        status_emoji = "✅" if status == "healthy" else "⚠️"
-        st.metric("🏥 System Status", f"{status_emoji} {status.title()}")
+        status_emoji = "" if status == "healthy" else ""
+        st.metric("System Status", f"{status_emoji} {status.title()}")
 
     st.divider()
 
@@ -631,7 +672,7 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
 
     with col1:
         # Domain Distribution Pie Chart
-        st.markdown("#### 📈 Domain Distribution")
+        st.markdown("#### Domain Distribution")
 
         if domains_data:
             domain_names = [d['name'] for d in domains_data]
@@ -655,7 +696,7 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
 
     with col2:
         # Domain Document Counts Bar Chart
-        st.markdown("#### 📊 Document Counts by Domain")
+        st.markdown("#### Document Counts by Domain")
 
         if domains_data:
             domain_names = [d['name'] for d in domains_data]
@@ -692,7 +733,7 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
 
         if stats.get("queries_count", 0) > 0:
             st.divider()
-            st.markdown("#### ⚡ Performance Metrics")
+            st.markdown("#### Performance Metrics")
 
             col1, col2, col3, col4 = st.columns(4)
 
@@ -724,7 +765,7 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
 
     # Feedback Statistics
     st.divider()
-    st.markdown("#### 📝 User Feedback Analytics")
+    st.markdown("#### User Feedback Analytics")
 
     feedback_data = get_feedback_stats()
 
@@ -743,14 +784,14 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
 
             with col2:
                 st.metric(
-                    "👍 Positive",
+                    "Positive",
                     f"{stats.get('positive', 0):,}",
                     delta=None
                 )
 
             with col3:
                 st.metric(
-                    "👎 Negative",
+                    "Negative",
                     f"{stats.get('negative', 0):,}",
                     delta=None
                 )
@@ -773,8 +814,8 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
                 negative_counts = [domain_feedback[d]['negative'] for d in domain_names]
 
                 fig = go.Figure(data=[
-                    go.Bar(name='👍 Positive', x=domain_names, y=positive_counts, marker_color='#4caf50'),
-                    go.Bar(name='👎 Negative', x=domain_names, y=negative_counts, marker_color='#f44336')
+                    go.Bar(name='Positive', x=domain_names, y=positive_counts, marker_color='#4caf50'),
+                    go.Bar(name='Negative', x=domain_names, y=negative_counts, marker_color='#f44336')
                 ])
 
                 fig.update_layout(
@@ -789,9 +830,9 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
             # Recent feedback
             recent = feedback_data.get("recent_feedback", [])
             if recent:
-                with st.expander("📋 Recent Feedback (Last 10)"):
+                with st.expander("Recent Feedback (Last 10)"):
                     for feedback in recent[:10]:
-                        rating_emoji = "👍" if feedback.get('rating', 0) > 0 else "👎"
+                        rating_emoji = "[+]" if feedback.get('rating', 0) > 0 else "[-]"
                         st.markdown(f"**{rating_emoji} {feedback.get('question', 'N/A')[:50]}...**")
                         st.caption(f"Domain: {feedback.get('domain', 'N/A')} | Time: {feedback.get('timestamp', 'N/A')}")
                         if feedback.get('comment'):
@@ -843,24 +884,24 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
 
     # System Information
     st.divider()
-    st.markdown("#### 🖥️ System Information")
+    st.markdown("#### System Information")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
         st.markdown("**Database Status**")
-        db_status = "✅ Ready" if health.get('database_ready') else "❌ Not Ready"
+        db_status = "Ready" if health.get('database_ready') else "Not Ready"
         st.write(db_status)
 
     with col2:
         st.markdown("**Ollama LLM**")
-        ollama_status = "✅ Running" if health.get('ollama_running') else "❌ Not Running"
+        ollama_status = "Running" if health.get('ollama_running') else "Not Running"
         st.write(ollama_status)
 
     with col3:
         st.markdown("**API Status**")
         api_status = health.get('status', 'unknown').title()
-        st.write(f"{'✅' if api_status == 'Healthy' else '⚠️'} {api_status}")
+        st.write(f"{'' if api_status == 'Healthy' else ''} {api_status}")
 
 
 # ============================================================================
@@ -870,13 +911,13 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
 def render_management_tab(domains_data: List[Dict]):
     """Render document management interface."""
 
-    st.markdown("### 🗂️ Document Management")
+    st.markdown("### Document Management")
 
     col1, col2 = st.columns(2)
 
     # Upload Section
     with col1:
-        st.markdown("#### 📤 Upload Documents")
+        st.markdown("#### Upload Documents")
 
         with st.container():
             upload_domain = st.text_input(
@@ -911,22 +952,22 @@ def render_management_tab(domains_data: List[Dict]):
 
                         if response.status_code == 200:
                             result = response.json()
-                            st.success(f"✅ {result['message']}")
-                            st.info(f"📊 Total documents: {result['total_documents']:,}")
+                            st.success(f"{result['message']}")
+                            st.info(f"Total documents: {result['total_documents']:,}")
                             st.balloons()
                             st.rerun()
                         else:
                             error_detail = response.json().get('detail', 'Unknown error')
-                            st.error(f"❌ Upload failed: {error_detail}")
+                            st.error(f"Upload failed: {error_detail}")
 
                     except requests.exceptions.Timeout:
-                        st.error("⏱️ Upload timeout (>5 minutes). File might be too large.")
+                        st.error("Upload timeout (>5 minutes). File might be too large.")
                     except Exception as e:
-                        st.error(f"❌ Error: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
     # Delete Section
     with col2:
-        st.markdown("#### 🗑️ Delete Domain")
+        st.markdown("#### Delete Domain")
 
         with st.container():
             if domains_data:
@@ -937,12 +978,12 @@ def render_management_tab(domains_data: List[Dict]):
                     key="delete_domain_select"
                 )
 
-                st.warning("⚠️ This action cannot be undone!")
+                st.warning("This action cannot be undone!")
 
                 if st.button("Delete Domain", type="secondary", use_container_width=True):
                     if st.session_state.get('confirm_delete') != domain_to_delete:
                         st.session_state.confirm_delete = domain_to_delete
-                        st.warning(f"⚠️ Click again to confirm deletion of '{domain_to_delete}'")
+                        st.warning(f"Click again to confirm deletion of '{domain_to_delete}'")
                     else:
                         with st.spinner(f"Deleting domain '{domain_to_delete}'..."):
                             try:
@@ -954,24 +995,24 @@ def render_management_tab(domains_data: List[Dict]):
 
                                 if response.status_code == 200:
                                     result = response.json()
-                                    st.success(f"✅ {result['message']}")
-                                    st.info(f"📊 Deleted {result['documents_deleted']:,} documents")
-                                    st.info(f"📊 Remaining: {result['total_documents_remaining']:,} documents")
+                                    st.success(f"{result['message']}")
+                                    st.info(f"Deleted {result['documents_deleted']:,} documents")
+                                    st.info(f"Remaining: {result['total_documents_remaining']:,} documents")
                                     st.session_state.confirm_delete = None
                                     st.rerun()
                                 else:
                                     error_detail = response.json().get('detail', 'Unknown error')
-                                    st.error(f"❌ Delete failed: {error_detail}")
+                                    st.error(f"Delete failed: {error_detail}")
                                     st.session_state.confirm_delete = None
                             except Exception as e:
-                                st.error(f"❌ Error: {str(e)}")
+                                st.error(f"Error: {str(e)}")
                                 st.session_state.confirm_delete = None
             else:
                 st.info("No domains available to delete")
 
     # Domain List
     st.divider()
-    st.markdown("#### 📋 Current Domains")
+    st.markdown("#### Current Domains")
 
     if domains_data:
         for domain in domains_data:
@@ -981,7 +1022,7 @@ def render_management_tab(domains_data: List[Dict]):
             with col2:
                 st.write(f"{domain['document_count']:,} documents")
             with col3:
-                st.write(f"📊")
+                st.write(f"")
     else:
         st.info("No domains available. Upload documents to get started!")
 
@@ -992,15 +1033,15 @@ def render_management_tab(domains_data: List[Dict]):
 
 def show_auth_page():
     """Show login/register page."""
-    st.markdown('<h1 class="main-header">FlexiRAG</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">Multi-Domain RAG</h1>', unsafe_allow_html=True)
     st.markdown("**Dynamic Multi-Domain RAG Framework**")
     st.divider()
 
     # Create tabs for Login and Register
-    auth_tab1, auth_tab2 = st.tabs(["🔐 Login", "📝 Register"])
+    auth_tab1, auth_tab2 = st.tabs(["Login", "Register"])
 
     with auth_tab1:
-        st.subheader("Login to FlexiRAG")
+        st.subheader("Login to Multi-Domain RAG")
 
         with st.form("login_form"):
             username = st.text_input("Username", key="login_username")
@@ -1051,7 +1092,7 @@ def show_auth_page():
     # Footer
     st.markdown("""
     <div class="footer">
-        FlexiRAG - Dynamic Multi-Domain RAG Framework<br>
+        Multi-Domain RAG<br>
         Please login or register to continue
     </div>
     """, unsafe_allow_html=True)
@@ -1072,10 +1113,10 @@ def main():
     # Header with user info and logout
     col1, col2 = st.columns([4, 1])
     with col1:
-        st.markdown('<h1 class="main-header">FlexiRAG</h1>', unsafe_allow_html=True)
+        st.markdown('<h1 class="main-header">Multi-Domain RAG</h1>', unsafe_allow_html=True)
         st.markdown("**Dynamic Multi-Domain RAG Framework** | Zero-code document intelligence for any domain")
     with col2:
-        st.write(f"👤 **{st.session_state.user.get('username', 'User')}**")
+        st.write(f"**{st.session_state.user.get('username', 'User')}**")
         if st.button("Logout", use_container_width=True):
             logout_user()
 
@@ -1086,16 +1127,16 @@ def main():
     # System status indicator
     status = health.get('status', 'unknown')
     if status == "healthy":
-        st.success("✅ System Healthy | All services running")
+        st.success("System Healthy | All services running")
     elif status == "degraded":
-        st.warning("⚠️ System Degraded | Some services may be unavailable")
+        st.warning("System Degraded | Some services may be unavailable")
     else:
-        st.error("❌ System Error | Please check services")
+        st.error("System Error | Please check services")
 
     st.divider()
 
     # Tabs Navigation
-    tab1, tab2, tab3 = st.tabs(["💬 Chat", "📊 Analytics", "🗂️ Management"])
+    tab1, tab2, tab3 = st.tabs(["Chat", "Analytics", "Management"])
 
     with tab1:
         render_chat_tab(health, domains_data)
@@ -1109,7 +1150,7 @@ def main():
     # Footer
     st.markdown("""
     <div class="footer">
-        FlexiRAG - Dynamic Multi-Domain RAG Framework | Powered by FastAPI, Streamlit & Ollama<br>
+        Multi-Domain RAG | Powered by FastAPI, Streamlit & Ollama<br>
         Built using Python, ChromaDB, and Llama 3.2 | 100% Free & Local
     </div>
     """, unsafe_allow_html=True)

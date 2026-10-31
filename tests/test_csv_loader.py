@@ -5,7 +5,7 @@ import pytest
 import pandas as pd
 import tempfile
 from pathlib import Path
-from src.csv_loader import load_csv_as_documents
+from rag.ingestion.csv_loader import load_csv_as_documents, load_all_csvs_from_directory
 
 
 class TestCSVLoader:
@@ -117,3 +117,49 @@ class TestCSVLoader:
         documents = load_csv_as_documents(generic_csv_file, domain='custom_domain')
 
         assert all(doc.metadata['domain'] == 'custom_domain' for doc in documents)
+
+
+class TestCSVDomainMetadata:
+    """Domain metadata must reach the vector store and work as a filter."""
+
+    def _write_domain(self, root, name, rows):
+        folder = root / name
+        folder.mkdir()
+        pd.DataFrame(rows).to_csv(folder / "items.csv", index=False)
+        return folder
+
+    def test_directory_loader_uses_explicit_domain(self, tmp_path):
+        folder = self._write_domain(tmp_path, "shop", {"name": ["a", "b"]})
+        docs = load_all_csvs_from_directory(str(folder), domain="catalog")
+        assert {d.metadata["domain"] for d in docs} == {"catalog"}
+
+    def test_directory_loader_defaults_to_folder_name(self, tmp_path):
+        folder = self._write_domain(tmp_path, "shop", {"name": ["a", "b"]})
+        docs = load_all_csvs_from_directory(str(folder))
+        assert {d.metadata["domain"] for d in docs} == {"shop"}
+
+    def test_domain_is_never_none(self, tmp_path):
+        folder = self._write_domain(tmp_path, "shop", {"name": ["a"]})
+        docs = load_csv_as_documents(str(folder / "items.csv"))
+        assert all(d.metadata["domain"] == "shop" for d in docs)
+
+    def test_domain_filter_in_chroma(self, tmp_path, fake_embeddings):
+        from rag.retrieval.vector_store import (
+            initialize_chroma_db, index_documents, query_similar_chunks,
+            get_available_domains)
+        shop = self._write_domain(
+            tmp_path, "shop", {"name": ["red dress", "blue jacket"]})
+        cars = self._write_domain(
+            tmp_path, "cars", {"name": ["engine torque", "brake pads"]})
+        docs = (load_all_csvs_from_directory(str(shop), domain="shop")
+                + load_all_csvs_from_directory(str(cars), domain="cars"))
+
+        _, collection = initialize_chroma_db(str(tmp_path / "chroma"))
+        index_documents(collection, docs)
+
+        assert get_available_domains(collection) == {"shop": 2, "cars": 2}
+        hits = query_similar_chunks(
+            collection, "red dress", n_results=4,
+            filter_metadata={"domain": "cars"})
+        assert len(hits["documents"][0]) == 2
+        assert all(m["domain"] == "cars" for m in hits["metadatas"][0])

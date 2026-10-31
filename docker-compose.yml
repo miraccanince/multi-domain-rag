@@ -1,82 +1,57 @@
-version: '3.8'
+# Runs the API and the Streamlit UI. Ollama runs on the host by default.
+#
+#   docker compose up --build
+#   docker compose run --rm api python -m scripts.index_documents --yes
+#
+# To run Ollama in a container instead:
+#   OLLAMA_URL=http://ollama:11434 docker compose --profile ollama up --build
+#   docker compose exec ollama ollama pull llama3.2:3b
 
 services:
-  # FastAPI Backend
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: rag-api
+    build: .
     ports:
       - "8000:8000"
-    volumes:
-      - ./chroma_db:/app/chroma_db
-      - ./data:/app/data
-      - ./bm25_index.pkl:/app/bm25_index.pkl
     environment:
-      - OLLAMA_HOST=host.docker.internal:11434
-    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
-    networks:
-      - rag-network
-    depends_on:
-      - ollama
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      JWT_SECRET: ${JWT_SECRET:-}
+      RAG_DATA_DIR: /app/data
+      RAG_STORAGE_DIR: /app/storage
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/app/data
+      - ./storage:/app/storage
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 120s
 
-  # Streamlit Frontend
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: rag-frontend
+    build: .
     ports:
       - "8501:8501"
     environment:
-      - API_BASE_URL=http://api:8000
-    command: streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0
-    networks:
-      - rag-network
+      API_URL: http://api:8000
+      JWT_SECRET: ${JWT_SECRET:-}
+      RAG_STORAGE_DIR: /app/storage
+    volumes:
+      - ./storage:/app/storage
+    command: python -m streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0
     depends_on:
-      - api
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      api:
+        condition: service_healthy
 
-  # Ollama (optional - use if not running locally)
-  # Uncomment if you want to run Ollama in Docker
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   container_name: rag-ollama
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama-data:/root/.ollama
-  #   networks:
-  #     - rag-network
-
-networks:
-  rag-network:
-    driver: bridge
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
 
 volumes:
   ollama-data:
-    driver: local
-
-# Usage:
-# 1. Start all services:
-#    docker-compose up -d
-#
-# 2. View logs:
-#    docker-compose logs -f
-#
-# 3. Stop all services:
-#    docker-compose down
-#
-# 4. Rebuild after code changes:
-#    docker-compose up -d --build

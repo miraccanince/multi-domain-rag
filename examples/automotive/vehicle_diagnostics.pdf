@@ -1,0 +1,80 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Contents 4 0 R /Resources << /Font << /F1 7 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 855 >>
+stream
+BT
+/F1 11 Tf
+14 TL
+50 780 Td
+(Vehicle Diagnostics Primer \(synthetic sample\)) '
+() '
+(Controller Area Network \(CAN\) is a serial bus that lets electronic control units in a) '
+(vehicle exchange messages without a central host. Each message has an identifier that) '
+(sets its priority, and a node that loses arbitration waits and retries.) '
+() '
+(A classical CAN frame carries up to eight data bytes. Typical bus speeds are 125) '
+(kbit/s for body electronics and 500 kbit/s for powertrain. Two twisted wires, CAN) '
+(high and CAN low, carry a differential signal, and a 120 ohm terminating resistor) '
+(sits at each end of the bus.) '
+() '
+(When a node detects an error it sends an error frame. A node with repeated errors) '
+(moves to the error passive state and finally goes bus off, so that one faulty unit) '
+(cannot block the whole network.) '
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Contents 6 0 R /Resources << /Font << /F1 7 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 936 >>
+stream
+BT
+/F1 11 Tf
+14 TL
+50 780 Td
+(On-Board Diagnostics and Brakes \(synthetic sample\)) '
+() '
+(OBD-II is the standard diagnostic interface found on passenger cars. A scan tool) '
+(connects to the 16 pin connector under the dashboard and reads diagnostic trouble) '
+(codes. A code such as P0301 reports a cylinder 1 misfire. The malfunction indicator) '
+(lamp turns on when the engine control unit stores an emissions related fault.) '
+() '
+(Hydraulic disc brakes press brake pads against a rotor. Brake fluid transfers pedal) '
+(force to the calipers, and the fluid absorbs water over time, which lowers its) '
+(boiling point. Anti-lock braking uses wheel speed sensors to release pressure when a) '
+(wheel is about to lock.) '
+() '
+(Tire pressure monitoring systems warn the driver when a tire loses more than a set) '
+(share of its pressure. Direct systems use a sensor inside each wheel, indirect) '
+(systems compare wheel speeds.) '
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000247 00000 n 
+0000001153 00000 n 
+0000001279 00000 n 
+0000002266 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+2336
+%%EOF
