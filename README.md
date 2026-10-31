@@ -89,7 +89,7 @@ Compose runs the API and the UI in two containers built from one image, mounts `
 
 ## Results and Evaluation
 
-**Automated tests.** There are 230 tests in 18 files under `tests/`. On 31 October 2026, on a fresh virtualenv built with `pip install -r requirements.txt` (Python 3.13, macOS arm64, sentence-transformers 5.7.0, torch 2.15.0, ChromaDB 0.5.23, Streamlit 1.66.1): 230 passed, 0 failed, 0 skipped. That includes `test_embeddings.py` and `test_vector_store.py`, which load the real `all-MiniLM-L6-v2` model, and the evaluation tests that read the downloaded NIST PDFs. The CI workflow runs the same suite, but I could not see its run history, and it would skip the PDF-based evaluation tests unless the PDFs are downloaded first.
+**Automated tests.** There are 230 tests in 18 files under `tests/`. On 31 October 2026, on a fresh virtualenv built with `pip install .` (Python 3.13, macOS arm64, sentence-transformers 5.7.0, torch 2.15.0, ChromaDB 0.5.23, Streamlit 1.66.1): 230 passed, 0 failed, 0 skipped. That includes `test_embeddings.py` and `test_vector_store.py`, which load the real `all-MiniLM-L6-v2` model, and the evaluation tests that read the downloaded NIST PDFs. The CI workflow runs the same suite, but I could not see its run history, and it would skip the PDF-based evaluation tests unless the PDFs are downloaded first.
 
 **Real versus mocked.** Most tests mock the slow parts: embeddings are deterministic fake vectors and Ollama is replaced by a fake that records prompts and returns canned text. These parts are real in those tests: PDF and CSV loading, ChromaDB (a real collection in a temporary directory), BM25, Reciprocal Rank Fusion, reranker reply parsing, prompt and source building, the NDJSON protocol, the caches, the CLI loop with scripted input, and the FastAPI app through `TestClient`. They show that the pipeline is wired correctly and that source attribution, domain filtering and failure handling behave as designed. Only `test_embeddings.py`, `test_vector_store.py` and the smoke test below run a real model.
 
@@ -174,7 +174,7 @@ git clone https://github.com/miraccanince/multi-domain-rag.git
 cd multi-domain-rag
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install .
 
 ollama pull llama3.2:3b
 ```
@@ -251,7 +251,7 @@ examples/               synthetic sample domains: automotive (PDF), products (CS
 tests/                  pytest suite
 eval/                   retrieval and answer evaluation (data sources, questions, tooling); see eval/README.md
 docs/feedback.md        feedback system notes
-Dockerfile, docker-compose.yml, start_services.sh, requirements.txt, pytest.ini
+Dockerfile, docker-compose.yml, start_services.sh, pyproject.toml, pytest.ini
 .github/workflows/tests.yml
 ```
 

@@ -460,28 +460,21 @@ def render_chat_tab(health: Dict, domains_data: List[Dict]):
 
     # Example questions
     with st.expander("Example Questions"):
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("**Automotive:**")
-            if st.button("What is CAN protocol?", use_container_width=True):
-                st.session_state.question = "What is CAN protocol?"
-            if st.button("How does OBD-II work?", use_container_width=True):
-                st.session_state.question = "How does OBD-II work?"
+            st.markdown("**Technical:**")
+            if st.button("Minimum password length?", use_container_width=True):
+                st.session_state.question = "What is the minimum password length when a password is the only authentication factor?"
+            if st.button("Media sanitization methods?", use_container_width=True):
+                st.session_state.question = "Which three sanitization methods does SP 800-88 name?"
 
         with col2:
-            st.markdown("**Fashion:**")
-            if st.button("Show dresses under $50", use_container_width=True):
-                st.session_state.question = "Show me dresses under $50"
-            if st.button("Athletic wear brands?", use_container_width=True):
-                st.session_state.question = "What brands sell athletic wear?"
-
-        with col3:
-            st.markdown("**Medical:**")
-            if st.button("What is Aspirin for?", use_container_width=True):
-                st.session_state.question = "What is Aspirin used for?"
-            if st.button("Ibuprofen dosage?", use_container_width=True):
-                st.session_state.question = "What is the dosage of Ibuprofen?"
+            st.markdown("**Vehicles:**")
+            if st.button("2024 diesel vehicles?", use_container_width=True):
+                st.session_state.question = "Which 2024 vehicles use diesel fuel?"
+            if st.button("2024 hydrogen vehicles?", use_container_width=True):
+                st.session_state.question = "Which 2024 vehicles run on hydrogen?"
 
     # Question Input
     question = st.text_input(
