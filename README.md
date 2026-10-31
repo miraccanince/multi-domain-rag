@@ -163,7 +163,7 @@ What the numbers show, and what they do not:
 
 ### Prerequisites
 
-- Python 3.11 or newer (CI uses 3.11)
+- Python 3.12 or newer (CI uses 3.13). Python 3.11 cannot install this project: `langchain==0.3.15` caps `numpy` below 2 on Python < 3.12, which conflicts with the `numpy>=2.0` that Streamlit's `pyarrow` dependency needs.
 - [Ollama](https://ollama.com/) running on port 11434
 - Network access on the first run: `pip install` pulls in PyTorch through `sentence-transformers`, and the embedding model is downloaded on first use
 

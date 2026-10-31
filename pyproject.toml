@@ -2,7 +2,7 @@
 name = "multi-domain-rag"
 version = "0.1.0"
 description = "Retrieval-augmented generation over documents from different domains"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     # Core
     "langchain==0.3.15",
@@ -15,7 +15,9 @@ dependencies = [
     "requests>=2.31.0",  # for Ollama API calls
     "pandas>=2.1.4",  # CSV data processing
     "numpy>=2.0",  # streamlit pulls in pyarrow, which requires numpy>=2.0; without this pin,
-                   # an unconstrained resolver can pick numpy 1.x and the app fails to start
+                   # an unconstrained resolver can pick numpy 1.x and the app fails to start.
+                   # langchain==0.3.15 itself caps numpy below 2 on Python < 3.12, which is
+                   # why this project now requires Python 3.12 or newer.
 
     # Hybrid retrieval
     "rank-bm25>=0.2.2",  # BM25 keyword search for hybrid retrieval
