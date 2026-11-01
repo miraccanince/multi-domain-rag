@@ -215,6 +215,23 @@ docker compose run --rm api python -m scripts.index_documents --yes
 
 This expects Ollama running on the host. To run Ollama in a container instead, use `OLLAMA_URL=http://ollama:11434 docker compose --profile ollama up --build` and pull the model with `docker compose exec ollama ollama pull llama3.2:3b`.
 
+### Published image
+
+Every push to `main` that passes CI builds and publishes the API image to GitHub Container Registry as `ghcr.io/miraccanince/multi-domain-rag:latest` and `ghcr.io/miraccanince/multi-domain-rag:<commit-sha>`. The image is not built or pushed for pull requests.
+
+```bash
+docker pull ghcr.io/miraccanince/multi-domain-rag:latest
+
+docker run -p 8000:8000 \
+  -e OLLAMA_URL=http://host.docker.internal:11434 \
+  --add-host=host.docker.internal:host-gateway \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/storage:/app/storage \
+  ghcr.io/miraccanince/multi-domain-rag:latest
+```
+
+The published image only contains the application. Ollama and the `llama3.2:3b` model are not included and must be run separately, either on the host or in their own container, and reachable at `OLLAMA_URL`. The image serves the FastAPI backend; the Streamlit frontend needs the same image run with the frontend command shown in [docker-compose.yml](docker-compose.yml).
+
 ### Example questions
 
 - Automotive sample: "What is a CAN error frame?", "What does the code P0301 mean?"
