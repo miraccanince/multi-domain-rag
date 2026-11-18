@@ -332,7 +332,7 @@ def query_documents_non_streaming(question: str, domain: str = None, n_results: 
     }
 
     try:
-        response = requests.post(f"{API_BASE_URL}/query", json=payload, timeout=60)
+        response = requests.post(f"{API_BASE_URL}/query", json=payload, headers=get_auth_headers(), timeout=60)
         if response.status_code == 200:
             return response.json()
         else:
@@ -354,7 +354,7 @@ def submit_feedback(question: str, answer: str, rating: int, domain: Optional[st
     }
 
     try:
-        response = requests.post(f"{API_BASE_URL}/feedback", json=payload, timeout=10)
+        response = requests.post(f"{API_BASE_URL}/feedback", json=payload, headers=get_auth_headers(), timeout=10)
         return response.status_code == 200
     except Exception as e:
         st.error(f"Error submitting feedback: {e}")
@@ -364,7 +364,7 @@ def submit_feedback(question: str, answer: str, rating: int, domain: Optional[st
 def get_feedback_stats():
     """Get feedback statistics from the API."""
     try:
-        response = requests.get(f"{API_BASE_URL}/feedback/stats", timeout=10)
+        response = requests.get(f"{API_BASE_URL}/feedback/stats", headers=get_auth_headers(), timeout=10)
         if response.status_code == 200:
             return response.json()
         return None
@@ -839,7 +839,7 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
             with col1:
                 if st.button("Download as CSV", key="export_csv", use_container_width=True):
                     try:
-                        response = requests.get(f"{API_BASE_URL}/feedback/export?format=csv", timeout=10)
+                        response = requests.get(f"{API_BASE_URL}/feedback/export?format=csv", headers=get_auth_headers(), timeout=10)
                         if response.status_code == 200:
                             st.download_button(
                                 label="Click to Download CSV",
@@ -856,7 +856,7 @@ def render_analytics_tab(health: Dict, domains_data: List[Dict]):
             with col2:
                 if st.button("Download as JSON", key="export_json", use_container_width=True):
                     try:
-                        response = requests.get(f"{API_BASE_URL}/feedback/export?format=json", timeout=10)
+                        response = requests.get(f"{API_BASE_URL}/feedback/export?format=json", headers=get_auth_headers(), timeout=10)
                         if response.status_code == 200:
                             st.download_button(
                                 label="Click to Download JSON",

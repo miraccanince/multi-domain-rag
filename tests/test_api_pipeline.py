@@ -28,6 +28,8 @@ def api(example_index, fake_ollama, tmp_path, monkeypatch):
     monkeypatch.setattr(api_main, "create_embedding", _fake_vector)
     monkeypatch.setattr(api_main, "get_semantic_cache", lambda: cache)
     monkeypatch.setattr(api_main.limiter, "enabled", False)
+    monkeypatch.setitem(api_main.app.dependency_overrides, api_main.require_auth,
+                        lambda: {"username": "tester"})
     test_client = TestClient(api_main.app)
     test_client.chroma = client
     test_client.cache = cache
