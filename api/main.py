@@ -21,6 +21,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import json
+import os
 import chromadb
 from pathlib import Path
 from datetime import datetime
@@ -57,7 +58,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # CORS middleware for frontend access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
+    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:8501").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -301,7 +302,8 @@ async def root():
     }
 
 
-@app.post("/query", response_model=QueryResponse, tags=["Question Answering"])
+@app.post("/query", response_model=QueryResponse, tags=["Question Answering"],
+          dependencies=[Depends(require_auth)])
 @limiter.limit("10/minute")
 async def query_documents(request: Request, query_request: QueryRequest):
     """
@@ -494,7 +496,8 @@ async def query_documents(request: Request, query_request: QueryRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/search", response_model=SearchResponse, tags=["Search"])
+@app.post("/search", response_model=SearchResponse, tags=["Search"],
+          dependencies=[Depends(require_auth)])
 @limiter.limit("20/minute")
 async def search_documents(request: Request, search_request: SearchRequest):
     """
@@ -639,7 +642,7 @@ async def health_check():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/feedback", tags=["Feedback"])
+@app.post("/feedback", tags=["Feedback"], dependencies=[Depends(require_auth)])
 @limiter.limit("30/minute")
 async def submit_feedback(request: Request, feedback_request: FeedbackRequest):
     """
@@ -671,7 +674,7 @@ async def submit_feedback(request: Request, feedback_request: FeedbackRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/feedback/stats", tags=["Feedback"])
+@app.get("/feedback/stats", tags=["Feedback"], dependencies=[Depends(require_auth)])
 async def get_feedback_stats():
     """
     Get feedback statistics and analytics.
@@ -693,7 +696,7 @@ async def get_feedback_stats():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/feedback/export", tags=["Feedback"])
+@app.get("/feedback/export", tags=["Feedback"], dependencies=[Depends(require_auth)])
 async def export_feedback(
     format: str = "csv",
     start_date: Optional[str] = None,

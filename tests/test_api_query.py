@@ -49,6 +49,8 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setattr(api_main, "hybrid_engine", FakeEngine())
     monkeypatch.setattr("requests.post", fake_post)
     monkeypatch.setattr(api_main.limiter, "enabled", False)
+    monkeypatch.setitem(api_main.app.dependency_overrides, api_main.require_auth,
+                        lambda: {"username": "tester"})
 
     test_client = TestClient(api_main.app)
     test_client.cache = cache
