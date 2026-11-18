@@ -40,11 +40,7 @@ Documents such as technical manuals and product catalogs come in different forma
  answer + sources (file, page or row)
 ```
 
-- **Ingestion** ([rag/ingestion/](rag/ingestion/), [scripts/index_documents.py](scripts/index_documents.py)): PDFs are split into 1000-character chunks with 200 characters of overlap. CSV rows become documents from their text columns.
-- **Retrieval** ([rag/retrieval/hybrid_search.py](rag/retrieval/hybrid_search.py)): the BM25 index is built in memory from the collection. The API rebuilds it and clears the caches when the collection changes.
-- **Reranking** ([rag/retrieval/reranker.py](rag/retrieval/reranker.py)): prompt-based ranking with the same local model, not a trained cross-encoder. If it fails, the retrieval order is kept.
-- **Generation** ([rag/qa_chain.py](rag/qa_chain.py)): the prompt tells the model to answer only from the context and to say so when it cannot. Answers are capped at 150 tokens.
-- **Backend and UI** ([api/main.py](api/main.py), [frontend/app.py](frontend/app.py)): `/query`, `/search`, `/upload`, `/auth/*` and other endpoints, plus a Streamlit app with chat, analytics and management tabs.
+PDFs are split into 1000-character chunks with 200 characters of overlap; CSV rows become documents from their text columns. The BM25 index is built in memory from the collection and rebuilt when it changes. Reranking is prompt-based ranking with the same local model, not a trained cross-encoder, and falls back to the retrieval order if it fails. The generation prompt tells the model to answer only from the context, say so when it cannot, and caps answers at 150 tokens.
 
 ## Tech Stack
 
